@@ -54,30 +54,22 @@ end)
 
 section1:addButton("Anti Afk (not pressing buttons)", function(r)
  if r then
+pcall(
+    function()
 while wait(0.1) do
 print("Anti AFK Activated")
 local VirtualUser=game:service'VirtualUser'
 game:service('Players').LocalPlayer.Idled:connect(function()
 VirtualUser:CaptureController()
 VirtualUser:ClickButton2(Vector2.new())
-end)
-
-section1:addButton("ABA anti afk bypass", function(r)
- if r then
-pcall(
-    function()
-while wait(0.1) do
-if game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("afker") then
-print("FOUND")
+wait()
 local args = {
     [1] = game:GetService("Players").LocalPlayer.PlayerGui.afker.Frame.YES.LocalScript
 }
 
 game:GetService("ReplicatedStorage").afk:FireServer(unpack(args))
-print("EZZZZZZZZZZZZZZZZZZZ")
-end
-end
 end)
+end
 
     
  local page = venyx:addPage("Settings", 5012544693)
