@@ -1,7 +1,7 @@
 local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Hunter15917/Scripts/main/MainGUI.md"))()
 local venyx = library.new("Sparrow", 5013109572)
  
--- themes
+
        local themes = {
        Background = Color3.fromRGB(0, 0, 0),
         Glow = Color3.fromRGB(159, 0, 255),
