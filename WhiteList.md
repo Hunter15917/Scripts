@@ -67,7 +67,7 @@ local LP = game.Players.LocalPlayer
 
 -- whitelist keys
 local whitelist1 = ("FHGfNfgBMXP6A83dbFuW")
-local whitelist2 = ("cMDWk7CRYmXFYyRkySmN")
+local whitelist2 = ("j")
 local whitelist3 = ("7zBqdTUAtM4z4x5PQQDT")
 
 
