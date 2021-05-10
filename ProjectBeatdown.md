@@ -1,4 +1,4 @@
-local library = loadstring("https://raw.githubusercontent.com/Hunter15917/Scripts/main/MainGUI.md"))()
+local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Hunter15917/Scripts/main/MainGUI.md"))()
 local venyx = library.new("Sparrow", 5013109572)
  
 -- themes
