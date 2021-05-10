@@ -142,7 +142,7 @@ end)
 
 
 -- blacklist keys
-local blacklist1 = ("HHGfNfgBMXP6A83dbFuW")
+local blacklist1 = ("cMDWk7CRYmXFYyRkySmN")
 local blacklist2 = ("MMDWk7CRYmXFYyRkySmN")
 local blacklist3 = ("ZZBqdTUAtM4z4x5PQQDT")
 
