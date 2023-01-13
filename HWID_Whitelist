@@ -1,4 +1,4 @@
-print(WhitelistKey)
+print(_G.WhitelistKey)
 local Good_HWIDS = {"C155CEA2-B69A-47E6-9ED9-0D7548EA7B13"}
 local Current_HWID = game:getService("RbxAnalyticsService"):GetClientId()
 local CorrectPerson = false
