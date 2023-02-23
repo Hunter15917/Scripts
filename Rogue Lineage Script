@@ -1,0 +1,270 @@
+ for i,v in pairs(getconnections(game:GetService("ScriptContext").Error)) do 
+        v:Disable()
+    end
+
+
+local library = loadstring(game:HttpGet("https://pastebin.com/raw/6JKAWS08"))()
+local venyx = library.new("Sparrow", 5013109572)
+ 
+-- themes
+       local themes = {
+       Background = Color3.fromRGB(0, 0, 0),
+        Glow = Color3.fromRGB(159, 0, 255),
+        Accent = Color3.fromRGB(47, 11, 227),
+        LightContrast = Color3.fromRGB(17, 17, 223),
+        DarkContrast = Color3.fromRGB(12, 12, 12),  
+        TextColor = Color3.fromRGB(255, 255, 255)
+}
+ 
+-- first page
+local page = venyx:addPage("yerrrr", 5012544693)
+local section1 = page:addSection("Sliders")
+local section2 = page:addSection("Toggles")
+local section3 = page:addSection("Buttons")
+
+local Player = game.Players.LocalPlayer
+local Character = Player.Character
+
+local wrksp = game:GetService("Workspace");
+local StarterGui = game:GetService("StarterGui")
+local Camera = wrksp.CurrentCamera;
+    
+local Walk = Character.Boosts.SpeedBoost
+local WalkSpeed = nil;
+local MeasuredDistance = 0;
+local FullBright = false
+local ESP = false
+local RefreshRate = 14 
+
+local WTVP = Camera.WorldToViewportPoint;
+local IsDescendantOf = game.IsDescendantOf;
+local Vec2 = Vector2.new(0, 15);
+local strformat = string.format;
+
+  local Meshes = {
+        ["rbxassetid://16657069"] = "Money Bag",
+        ["rbxassetid://60791940"] = "Scroll",
+        ["rbxassetid://2877143560"] = "Jewel",
+        ["rbxassetid://2637545558"] = "Ring",
+        ["rbxassetid://439102658"] = "Phoenix Feather",
+        ["rbxassetid://13116112"] = "Goblet",
+        ["rbxassetid://5196577540"] = "Amulet",
+        ["rbxassetid://5204003946"] = "Goblet",
+        ["rbxassetid://5204453430"] = "Scroll",
+        ["rbxassetid://5196782997"] = "Old Ring",
+        ["rbxassetid://%2016657069%20"] = "Money Bag",
+        ["rbxassetid://%2060791940%20"] = "Scroll",
+        ["rbxassetid://%202877143560%20"] = "Jewel",
+        ["rbxassetid://%202637545558%20"] = "Ring",
+        ["rbxassetid://%20439102658%20"] = "Phoenix Feather",
+        ["rbxassetid://%2013116112%20"] = "Goblet",
+        ["rbxassetid://%205196577540%20"] = "Amulet",
+        ["rbxassetid://%205204003946%20"] = "Goblet",
+        ["rbxassetid://%205204453430%20"] = "Scroll",
+        ["rbxassetid://%205196782997%20"] = "Old Ring",
+        ["rbxassetid://5196776695"] = "Ring",
+        ["rbxassetid://%205196776695%20"] = "Ring",
+    
+    }
+    
+   
+    function WTS(Position)
+        local VP,bool = WTVP(Camera,Position)
+        return Vector2.new(VP.x, VP.y),bool,VP.Z
+    end
+
+  function CreateESP(Character, Class)
+        local LastRefresh = 0;
+        if not Character then
+            return
+        end
+        
+        local PName = Character.Name;
+        local Name = Drawing.new("Text")
+        Name.Text = Character.Name;
+        Name.Color = Color3.fromRGB(255,255,255)
+        Name.Position = WTS(Character.Position);
+        Name.Size = 20
+        Name.Outline = true
+        Name.Center = true
+        Name.Visible = true
+        Name.Font = 2
+        local Bottom = Drawing.new("Text")
+        Bottom.Color = Color3.fromRGB(192,192,192)
+        Bottom.Position = WTS(Character.Position) + Vec2;
+        Bottom.Size = 13
+        Bottom.Outline = true
+        Bottom.Center = true
+        Bottom.Visible = true
+        Bottom.Font = 2
+        
+        pcall(function()
+            if Character.Parent:IsA("MeshPart") and Meshes[Character.Parent.MeshId]  then 
+                Name.Text = tostring(Meshes[Character.Parent.MeshId]) 
+            elseif Character.Parent:IsA("Part") and Character.Parent:FindFirstChildWhichIsA("SpecialMesh") and Meshes[Character.Parent:FindFirstChildWhichIsA("SpecialMesh").MeshId] then
+                Name.Text = tostring(Meshes[Character.Parent:FindFirstChildWhichIsA("SpecialMesh").MeshId])
+            elseif Character.Parent:IsA("Part") and Character.Parent:FindFirstChildWhichIsA("SpecialMesh") and Character.Parent:FindFirstChild("OrbParticle") then
+                Name.Text = tostring("???")
+            else
+                Name.Text = tostring("Opal")
+            end
+        end)
+    
+        local Con;
+        Con = game:GetService("RunService").RenderStepped:Connect(function() --Update if on screen.
+            if (tick() - LastRefresh) > (RefreshRate / 1000) then
+                LastRefresh = tick();
+                if not IsDescendantOf(Character,workspace) and Name ~= nil and Bottom ~= nil then
+                    Con:Disconnect();
+                    Con = nil; 
+                    Name:Remove()
+                    Bottom:Remove()
+                    return 
+                end
+                local HRPP = Character.Position;
+                local Pos,Bool,Distance = WTS(HRPP);
+                if Bool and ESP == true and Distance <= MeasuredDistance then
+                    Bottom.Text = strformat('[%d]',Distance)
+                    Name.Position = Pos;
+                    Bottom.Position = Pos + Vec2;
+                    Name.Visible = true;
+                    Bottom.Visible = true;
+                else
+                    Name.Visible = false;
+                    Bottom.Visible = false;
+                end
+            end
+        end)
+    end
+ 
+
+if Character.Boosts:FindFirstChild("SpeedBoost") == nil then
+local SpeedBoost = Instance.new("NumberValue")
+SpeedBoost.Value = 0
+SpeedBoost.Parent = Character.Boosts
+SpeedBoost.Name = "SpeedBoost"
+end
+
+Player.CharacterAdded:Connect(function()
+if Character.Boosts:FindFirstChild("SpeedBoost") == nil then
+local SpeedBoost = Instance.new("NumberValue")
+SpeedBoost.Parent = Character.Boosts
+SpeedBoost.Name = "SpeedBoost"
+   
+Walk = SpeedBoost   
+   end
+end)
+
+
+
+
+section1:addSlider("Walk Speed", 0, 0, 75, function(value)
+WalkSpeed = value
+end)
+
+section1:addSlider("Trinket ESP Distance", 0, 0, 5000, function(value)
+MeasuredDistance = value
+end)
+
+
+
+
+section2:addToggle("Walk Speed", nil, function(r)
+if r then
+          Toggle1 = true
+          else
+            Toggle1 = false
+         end
+          while Toggle1 do
+           wait()
+       pcall(function()
+           if WalkSpeed ~= nil then
+            Walk.Value = WalkSpeed 
+            end
+        end)
+    end
+end)
+
+
+section2:addToggle("Full Bright", nil, function(r)
+if r then
+         Toggle2 = true
+         game.Lighting.Brightness = 1
+         game.Lighting.Ambient = Color3.fromRGB(255, 255, 255) 
+         else
+         Toggle2 = false
+         game.Lighting.Brightness = 0.12
+         game.Lighting.Ambient = Color3.fromRGB(20, 20, 20)
+         end
+end)
+
+section2:addToggle("No Fog", nil, function(r)
+if r then
+          Toggle3 = true
+         game.Lighting.FogEnd = 99999
+         game.Lighting.FogStart = 99999
+          else
+        Toggle3 = false
+         game.Lighting.FogEnd = 1125
+         game.Lighting.FogStart = 0
+    end
+end)
+
+
+section2:addToggle("Trinket ESP", nil, function(r)
+if r then
+        Toggle4 = true
+        ESP = true
+         else
+        Toggle4 = false
+        ESP = false
+    end
+end)
+
+
+section3:addButton("Infinite Bard", function()
+game:GetService("Players").LocalPlayer.PlayerGui.BardGui.LocalScript.Button.Label:Destroy()
+game:GetService("Players").LocalPlayer.PlayerGui.BardGui.ErrorFrame:Destroy()
+end)
+
+section3:addButton("NO FALL DAMAGE", function()
+loadstring(game:HttpGet("https://pastebin.com/raw/ERDp2x5W", true))()  
+end)
+
+
+     
+local page = venyx:addPage("Settings", 5012544693)
+local section1 = page:addSection("Settings")
+
+
+section1:addKeybind("Minimize Key", Enum.KeyCode.Minus, function()
+print("Activated Keybind")
+venyx:toggle()
+end, function()
+print("Changed Keybind")
+end)
+
+
+
+
+    for i,v in pairs(wrksp:GetChildren()) do 
+        if v:IsA("MeshPart") or v:IsA("UnionOperation") or v:IsA("Part") then 
+            for i2,v2 in pairs(v:GetDescendants()) do 
+                if v2:IsA("ClickDetector") then 
+                    CreateESP(v2.Parent)
+                end
+            end
+        end
+    end
+    
+    wrksp.ChildAdded:Connect(function(v)
+        if v:IsA("MeshPart") or v:IsA("UnionOperation") or v:IsA("Part") then 
+            for i2,v2 in pairs(v:GetDescendants()) do 
+                if v2:IsA("ClickDetector") then 
+                    CreateESP(v2.Parent)
+                end
+            end
+        end
+    end)
+
+
