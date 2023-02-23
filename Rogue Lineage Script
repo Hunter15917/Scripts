@@ -31,15 +31,11 @@ local Camera = wrksp.CurrentCamera;
     
 local Walk = Character.Boosts.SpeedBoost
 local WalkSpeed = nil;
-local MeasuredDistance = 0;
 local FullBright = false
-local ESP = false
-local RefreshRate = 14 
 
-local WTVP = Camera.WorldToViewportPoint;
-local IsDescendantOf = game.IsDescendantOf;
-local Vec2 = Vector2.new(0, 15);
-local strformat = string.format;
+local ESPToggle = false
+local MeasuredDistance = 0
+
 
   local Meshes = {
         ["rbxassetid://16657069"] = "Money Bag",
@@ -66,77 +62,66 @@ local strformat = string.format;
         ["rbxassetid://%205196776695%20"] = "Ring",
     
     }
-    
-   
-    function WTS(Position)
-        local VP,bool = WTVP(Camera,Position)
-        return Vector2.new(VP.x, VP.y),bool,VP.Z
-    end
 
-  function CreateESP(Character, Class)
-        local LastRefresh = 0;
-        if not Character then
-            return
-        end
-        
-        local PName = Character.Name;
-        local Name = Drawing.new("Text")
-        Name.Text = Character.Name;
-        Name.Color = Color3.fromRGB(255,255,255)
-        Name.Position = WTS(Character.Position);
-        Name.Size = 20
-        Name.Outline = true
-        Name.Center = true
-        Name.Visible = true
-        Name.Font = 2
-        local Bottom = Drawing.new("Text")
-        Bottom.Color = Color3.fromRGB(192,192,192)
-        Bottom.Position = WTS(Character.Position) + Vec2;
-        Bottom.Size = 13
-        Bottom.Outline = true
-        Bottom.Center = true
-        Bottom.Visible = true
-        Bottom.Font = 2
-        
+
+local function CreateTrinketESP(Object)
+local ESP = Drawing.new("Text")
+ESP.Color = Color3.fromRGB(255,255,255)
+ESP.Size = 17
+ESP.Outline = true
+ESP.Center = true
+ESP.Visible = true
+ESP.Font = 0
+
+local DistanceDisplay = Drawing.new("Text")
+DistanceDisplay.Color = Color3.fromRGB(192,192,192)
+DistanceDisplay.Size = 17
+DistanceDisplay.Outline = true
+DistanceDisplay.Center = true
+DistanceDisplay.Visible = true
+DistanceDisplay.Font = 0
+
         pcall(function()
-            if Character.Parent:IsA("MeshPart") and Meshes[Character.Parent.MeshId]  then 
-                Name.Text = tostring(Meshes[Character.Parent.MeshId]) 
-            elseif Character.Parent:IsA("Part") and Character.Parent:FindFirstChildWhichIsA("SpecialMesh") and Meshes[Character.Parent:FindFirstChildWhichIsA("SpecialMesh").MeshId] then
-                Name.Text = tostring(Meshes[Character.Parent:FindFirstChildWhichIsA("SpecialMesh").MeshId])
-            elseif Character.Parent:IsA("Part") and Character.Parent:FindFirstChildWhichIsA("SpecialMesh") and Character.Parent:FindFirstChild("OrbParticle") then
-                Name.Text = tostring("???")
+            if Object.Parent:IsA("MeshPart") and Meshes[Object.Parent.MeshId]  then 
+                ESP.Text = tostring(Meshes[Object.Parent.MeshId]) 
+            elseif Object.Parent:IsA("Part") and Object.Parent:FindFirstChildWhichIsA("SpecialMesh") and Meshes[Object.Parent:FindFirstChildWhichIsA("SpecialMesh").MeshId] then
+                ESP.Text = tostring(Meshes[Object.Parent:FindFirstChildWhichIsA("SpecialMesh").MeshId])
+            elseif Object.Parent:IsA("Part") and Object.Parent:FindFirstChildWhichIsA("SpecialMesh") and Object.Parent:FindFirstChild("OrbParticle") then
+                ESP.Text = tostring("???")
             else
-                Name.Text = tostring("Opal")
+                ESP.Text = tostring("Opal")
             end
         end)
-    
-        local Con;
-        Con = game:GetService("RunService").RenderStepped:Connect(function() --Update if on screen.
-            if (tick() - LastRefresh) > (RefreshRate / 1000) then
-                LastRefresh = tick();
-                if not IsDescendantOf(Character,workspace) and Name ~= nil and Bottom ~= nil then
-                    Con:Disconnect();
-                    Con = nil; 
-                    Name:Remove()
-                    Bottom:Remove()
-                    return 
-                end
-                local HRPP = Character.Position;
-                local Pos,Bool,Distance = WTS(HRPP);
-                if Bool and ESP == true and Distance <= MeasuredDistance then
-                    Bottom.Text = strformat('[%d]',Distance)
-                    Name.Position = Pos;
-                    Bottom.Position = Pos + Vec2;
-                    Name.Visible = true;
-                    Bottom.Visible = true;
-                else
-                    Name.Visible = false;
-                    Bottom.Visible = false;
-                end
-            end
-        end)
-    end
- 
+
+
+
+local rs 
+rs = game:GetService("RunService").RenderStepped:Connect(function()
+      local realpos, onscreen = workspace.CurrentCamera:WorldToViewportPoint(Object.Position)
+      local RoundedDistance = math.floor((Character.HumanoidRootPart.Position - Object.Position).Magnitude + 0.5)  
+   
+   
+      if not Object:IsDescendantOf(workspace) then
+           rs:Disconnect();
+           rs = nil; 
+           ESP:Remove()
+           DistanceDisplay:Remove()
+           return 
+      end
+      if onscreen and RoundedDistance <= MeasuredDistance and ESPToggle == true then
+         ESP.Position = Vector2.new(realpos.X, realpos.Y)
+         DistanceDisplay.Position = Vector2.new(realpos.X, realpos.Y) + Vector2.new(0, 15)
+         DistanceDisplay.Text = tostring(RoundedDistance) 
+         
+         ESP.Visible = true
+         DistanceDisplay.Visible = true
+      else
+           ESP.Visible = false
+           DistanceDisplay.Visible = false
+          end 
+   end)
+end
+
 
 if Character.Boosts:FindFirstChild("SpeedBoost") == nil then
 local SpeedBoost = Instance.new("NumberValue")
@@ -173,7 +158,7 @@ section2:addToggle("Walk Speed", nil, function(r)
 if r then
           Toggle1 = true
           else
-            Toggle1 = false
+            Toggle1 = false   
          end
           while Toggle1 do
            wait()
@@ -214,10 +199,10 @@ end)
 section2:addToggle("Trinket ESP", nil, function(r)
 if r then
         Toggle4 = true
-        ESP = true
+        ESPToggle = true
          else
         Toggle4 = false
-        ESP = false
+        ESPToggle = false
     end
 end)
 
@@ -245,26 +230,23 @@ print("Changed Keybind")
 end)
 
 
-
-
-    for i,v in pairs(wrksp:GetChildren()) do 
+    for i,v in pairs(workspace:GetChildren()) do 
         if v:IsA("MeshPart") or v:IsA("UnionOperation") or v:IsA("Part") then 
             for i2,v2 in pairs(v:GetDescendants()) do 
                 if v2:IsA("ClickDetector") then 
-                    CreateESP(v2.Parent)
+                     CreateTrinketESP(v2.Parent)
                 end
             end
         end
     end
     
-    wrksp.ChildAdded:Connect(function(v)
+    workspace.ChildAdded:Connect(function(v)
         if v:IsA("MeshPart") or v:IsA("UnionOperation") or v:IsA("Part") then 
             for i2,v2 in pairs(v:GetDescendants()) do 
                 if v2:IsA("ClickDetector") then 
-                    CreateESP(v2.Parent)
+                    CreateTrinketESP(v2.Parent)
                 end
             end
         end
     end)
-
 
