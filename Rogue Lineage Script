@@ -20,7 +20,7 @@ local venyx = library.new("Sparrow", 5013109572)
 local page = venyx:addPage("yerrrr", 5012544693)
 local section1 = page:addSection("Sliders")
 local section2 = page:addSection("Toggles")
-local section3 = page:addSection("Buttons")
+local section3 = page:addSection("Extras")
 
 local Player = game.Players.LocalPlayer
 local Character = Player.Character
