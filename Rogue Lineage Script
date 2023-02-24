@@ -29,12 +29,27 @@ local wrksp = game:GetService("Workspace");
 local StarterGui = game:GetService("StarterGui")
 local Camera = wrksp.CurrentCamera;
     
-local Walk = Character.Boosts.SpeedBoost
+local Walk = nil
 local WalkSpeed = nil;
 local FullBright = false
+local origwalkspeed = 0;
 
 local ESPToggle = false
 local MeasuredDistance = 0
+
+local Broke = false;
+local mana = false;
+local alreadyfalse = false;
+
+
+local Toggles = {
+    ["TrinketESPToggle"] = false,
+    ["Infinite Mana Toggle"] = false,
+    ["WalkSpeed Toggle"] = false,
+    ["PlayerESPToggle"] = false
+    
+}
+local PlayerESPTable = {}
 
 
   local Meshes = {
@@ -108,7 +123,7 @@ rs = game:GetService("RunService").RenderStepped:Connect(function()
            DistanceDisplay:Remove()
            return 
       end
-      if onscreen and RoundedDistance <= MeasuredDistance and ESPToggle == true then
+      if onscreen and RoundedDistance <= MeasuredDistance and Toggles["TrinketESPToggle"] == true then
          ESP.Position = Vector2.new(realpos.X, realpos.Y)
          DistanceDisplay.Position = Vector2.new(realpos.X, realpos.Y) + Vector2.new(0, 15)
          DistanceDisplay.Text = tostring(RoundedDistance) 
@@ -123,11 +138,62 @@ rs = game:GetService("RunService").RenderStepped:Connect(function()
 end
 
 
+local function PlayerESP(PlayerESP)
+   local Name_Distance = Drawing.new("Text")
+   Name_Distance.Size = 15
+   Name_Distance.Center = true
+   Name_Distance.Outline = true
+   Name_Distance.Font = 0;
+   Name_Distance.Color = Color3.fromRGB(255, 255, 255)
+  
+   local Health = Drawing.new("Text")
+   Health.Size = 15
+   Health.Center = true
+   Health.Outline = true
+   Health.Font = 0;
+   Health.Color = Color3.fromRGB(255, 255, 255)
+  
+   local rs
+   rs = game:GetService("RunService").RenderStepped:Connect(function()
+        if game.Players:FindFirstChild(PlayerESP.Name) == nil then
+           rs:Disconnect()
+           Name_Distance:Remove()
+           Health:Remove()
+        end                                                   
+ 
+        if table.find(PlayerESPTable, PlayerESP) and Toggles["PlayerESPToggle"] == true then
+          local World_Pos, Onscreen = workspace.CurrentCamera:WorldToViewportPoint(PlayerESP.Character.Head.Position)
+          
+          if Onscreen then
+           
+             Name_Distance.Text = "|"..PlayerESP.Name.."| |"..math.floor((PlayerESP.Character.HumanoidRootPart.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude + .5).."|"  
+             Health.Text = "|"..math.floor(PlayerESP.Character.Humanoid.Health + .5).." / "..math.floor(PlayerESP.Character.Humanoid.MaxHealth + .5).."|"
+            
+             Health.Position = Vector2.new(World_Pos.X, World_Pos.Y) - Vector2.new(0,30)
+             Name_Distance.Position = Vector2.new(World_Pos.X, World_Pos.Y) - Vector2.new(0,45)
+             Name_Distance.Visible = true
+             Health.Visible = true
+             else
+             Name_Distance.Visible = false 
+             Health.Visible = false
+          end
+        
+       
+         else
+          Name_Distance.Visible = false
+          Health.Visible = false
+        end                                                                                                               
+    end)
+end
+
+
 if Character.Boosts:FindFirstChild("SpeedBoost") == nil then
 local SpeedBoost = Instance.new("NumberValue")
 SpeedBoost.Value = 0
 SpeedBoost.Parent = Character.Boosts
 SpeedBoost.Name = "SpeedBoost"
+
+Walk = Character.Boosts.SpeedBoost
 end
 
 Player.CharacterAdded:Connect(function()
@@ -140,7 +206,7 @@ Walk = SpeedBoost
    end
 end)
 
-
+origwalkspeed = Character.Boosts.SpeedBoost.Value
 
 
 section1:addSlider("Walk Speed", 0, 0, 75, function(value)
@@ -163,7 +229,7 @@ if r then
           while Toggle1 do
            wait()
        pcall(function()
-           if WalkSpeed ~= nil then
+           if WalkSpeed ~= nil and Toggles["WalkSpeed Toggle"] == true then
             Walk.Value = WalkSpeed 
             end
         end)
@@ -171,7 +237,35 @@ if r then
 end)
 
 
-section2:addToggle("Full Bright", nil, function(r)
+
+section2:addToggle("Player ESP", nil, function(r)
+if r then
+        Toggle5 = true
+         else
+        Toggle5 = false
+    end
+end)
+
+
+section2:addToggle("Trinket ESP", nil, function(r)
+if r then
+        Toggle4 = true
+         else
+        Toggle4 = false
+    end
+end)
+
+
+section2:addToggle("Infinite Mana", nil, function(r)
+if r then
+        Toggle6 = true
+         else
+        Toggle6 = false
+    end
+end)
+
+
+section3:addToggle("Full Bright", nil, function(r)
 if r then
          Toggle2 = true
          game.Lighting.Brightness = 1
@@ -183,7 +277,7 @@ if r then
          end
 end)
 
-section2:addToggle("No Fog", nil, function(r)
+section3:addToggle("No Fog", nil, function(r)
 if r then
           Toggle3 = true
          game.Lighting.FogEnd = 99999
@@ -192,17 +286,6 @@ if r then
         Toggle3 = false
          game.Lighting.FogEnd = 1125
          game.Lighting.FogStart = 0
-    end
-end)
-
-
-section2:addToggle("Trinket ESP", nil, function(r)
-if r then
-        Toggle4 = true
-        ESPToggle = true
-         else
-        Toggle4 = false
-        ESPToggle = false
     end
 end)
 
@@ -229,7 +312,113 @@ end, function()
 print("Changed Keybind")
 end)
 
+section1:addKeybind("WalkSpeed Keybind", Enum.KeyCode.KeypadOne, function()
+if Toggle1 == true then
+    
+if Toggles["WalkSpeed Toggle"] == false then
+   Toggles["WalkSpeed Toggle"] = true
+    
+    else
+   Toggles["WalkSpeed Toggle"] = false
+    Walk.Value = origwalkspeed 
+    end
+end
 
+end, function()
+end)
+
+
+section1:addKeybind("Player ESP Keybind", Enum.KeyCode.KeypadTwo, function()
+if Toggle5 == true then
+    
+if Toggles["PlayerESPToggle"] == false then
+   Toggles["PlayerESPToggle"] = true
+    
+    else
+   Toggles["PlayerESPToggle"] = false
+    end
+end
+end, function()
+end)
+
+
+section1:addKeybind("Trinket ESP Keybind", Enum.KeyCode.KeypadThree, function()
+if Toggle4 == true then
+    
+if Toggles["TrinketESPToggle"] == false then
+   Toggles["TrinketESPToggle"] = true
+    
+    else
+   Toggles["TrinketESPToggle"] = false
+    end
+end
+end, function()
+end)
+
+section1:addKeybind("Infinite Mana Keybind", Enum.KeyCode.KeypadFour, function()
+if Toggle6 == true then
+    
+if Toggles["Infinite Mana Toggle"] == false then
+   Toggles["Infinite Mana Toggle"] = true
+    alreadyfalse = false
+    
+  spawn(function()
+ while wait() do
+  if Toggles["Infinite Mana Toggle"] == true then
+     if Character:FindFirstChild("Mana") then
+        Character.Mana.Value = 100
+        end
+   else
+      if alreadyfalse == false then
+           alreadyfalse = true
+           Character.Mana.Value = 0
+           break
+       end   
+    end
+end
+ end)
+
+    
+   else
+   Toggles["Infinite Mana Toggle"] = false
+   Character.Mana.Value = 0
+    end
+end
+end, function()
+end)
+
+for i,Players in pairs(game:GetService("Players"):GetPlayers()) do
+   if game.Players.LocalPlayer ~= Players then
+       
+   if Players.Character then
+   if not table.find(PlayerESPTable, Players) then
+         table.insert(PlayerESPTable,Players)
+         PlayerESP(Players)
+         print("insert")
+       end
+      Players.Character.Humanoid.Died:Connect(function()
+      if table.find(PlayerESPTable, Players) then
+         table.remove(PlayerESPTable, i)
+         print("died")
+          end                                  
+       end)
+   end
+   Players.CharacterAdded:Connect(function()
+         if not table.find(PlayerESPTable, Players) then
+         table.insert(PlayerESPTable,Players)
+         PlayerESP(Players)
+         print("char added")
+     end
+   Players.Character.Humanoid.Died:Connect(function()
+      if table.find(PlayerESPTable, Players) then
+         table.remove(PlayerESPTable, i)
+         print("died")
+           end                                  
+        end)
+     end)
+   end
+end 
+   
     for i,v in pairs(workspace:GetChildren()) do 
         if v:IsA("MeshPart") or v:IsA("UnionOperation") or v:IsA("Part") then 
             for i2,v2 in pairs(v:GetDescendants()) do 
@@ -249,4 +438,3 @@ end)
             end
         end
     end)
-
