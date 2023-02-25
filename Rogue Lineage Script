@@ -36,10 +36,13 @@ local venyx = library.new("Sparrow", 5013109572)
  
 -- first page
 local page = venyx:addPage("yerrrr", 5012544693)
-local section1 = page:addSection("Sliders")
-local section2 = page:addSection("Toggles")
-local section3 = page:addSection("Extras")
+local section1 = page:addSection("Walk Speed")
+local section2 = page:addSection("Climb Speed")
 
+local section3 = page:addSection("Player ESP")
+local section4 = page:addSection("Trinket ESP")
+local section5 = page:addSection("Infinite Mana")
+local section6 = page:addSection("Extras")
 
 -- variables
 local Character = Player.Character 
@@ -55,6 +58,7 @@ local FullBright = false
 
 local ESPToggle = false
 local MeasuredDistance = 0
+local MeasuredDistance_PlayerESP = 0
 
 local mana = false;
 local alreadyfalse = false;
@@ -67,7 +71,8 @@ local Toggles = {
     ["TrinketESPToggle"] = false,
     ["Infinite Mana Toggle"] = false,
     ["WalkSpeed Toggle"] = false,
-    ["PlayerESPToggle"] = false
+    ["PlayerESPToggle"] = false,
+    ["ClimbBoost Toggle"] = false,
     
 }
 
@@ -143,7 +148,7 @@ rs = game:GetService("RunService").RenderStepped:Connect(function()
            DistanceDisplay:Remove()
            return 
       end
-      if onscreen and RoundedDistance <= MeasuredDistance and Toggles["TrinketESPToggle"] == true and cantoggle == true then
+      if onscreen and RoundedDistance <= MeasuredDistance and Toggles["TrinketESPToggle"] == true and cantoggle == true and Toggle4 == true then
          ESP.Position = Vector2.new(realpos.X, realpos.Y)
          DistanceDisplay.Position = Vector2.new(realpos.X, realpos.Y) + Vector2.new(0, 15)
          DistanceDisplay.Text = tostring(RoundedDistance) 
@@ -181,7 +186,7 @@ local function PlayerESP(PlayerESP)
            Health:Remove()
         end                                                   
  
-        if table.find(PlayerESPTable, PlayerESP) and Toggles["PlayerESPToggle"] == true and cantoggle == true then
+        if table.find(PlayerESPTable, PlayerESP) and Toggles["PlayerESPToggle"] == true and cantoggle == true and Toggle5 == true and math.floor((PlayerESP.Character.HumanoidRootPart.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude + .5) <= MeasuredDistance_PlayerESP then
           local World_Pos, Onscreen = workspace.CurrentCamera:WorldToViewportPoint(PlayerESP.Character.Head.Position)
           
           if Onscreen then
@@ -219,11 +224,34 @@ Character.Humanoid.Died:Connect(function()
 NOTIFICATION("NOTIFICATION","Re-Execute the script")
 venyx:deleteui()
 cantoggle = false
+
+local CurrentBoosts = game.Players.LocalPlayer.Character.Boosts
+            pcall(function()
+            for _,boost in pairs(CurrentBoosts:GetChildren()) do
+                if table.find(newBoosts, "ClimbBoost") then
+                    boost:Destroy()
+                end
+                if oldBoosts["ClimbBoost"] ~= nil then
+                    boost.Value = oldBoosts["ClimbBoost"]
+                end
+           end
+      end)
+             pcall(function()
+            for _,boost in pairs(CurrentBoosts:GetChildren()) do
+                if table.find(newBoosts, "SpeedBoost") then
+                    boost:Destroy()
+                end
+                if oldBoosts["SpeedBoost"] ~= nil then
+                    boost.Value = oldBoosts["SpeedBoost"]
+                end
+           end
+     end)
 ExploitBoosts["SpeedBoost"] = 0
 ExploitBoosts["ClimbBoost"] = 0
 FullBright = false
 ESPToggle = false
 MeasuredDistance = 0
+MeasuredDistance_PlayerESP = 0
 mana = false;
 oldBoosts = {}
 newBoosts = {}
@@ -232,18 +260,24 @@ Toggles["TrinketESPToggle"] = false
 Toggles["Infinite Mana Toggle"] = false
 Toggles["WalkSpeed Toggle"] = false
 Toggles["PlayerESPToggle"] = false
+Toggles["ClimbBoost Toggle"] = false
 Toggle1 = false
 Toggle2 = false
 Toggle3 = false
 Toggle4 = false
 Toggle5 = false
 Toggle6 = false
-    spawn(function()
+  
+ spawn(function()
        wait(5)
         game.CoreGui.Sparrow:Destroy() 
         venyx:deleteui()
     end)
 end)
+
+
+
+
 
 
 
@@ -251,173 +285,9 @@ section1:addSlider("Walk Speed", 0, 0, 100, function(value)
 ExploitBoosts["SpeedBoost"] = value
 end)
 
-section1:addSlider("Trinket ESP Distance", 0, 0, 5000, function(value)
-MeasuredDistance = value
-end)
-
-
-section2:addToggle("Walk Speed", nil, function(r)
-if r then
-          Toggle1 = true
-         
-         
-          if Toggles["WalkSpeed Toggle"] == false then
-            NOTIFICATION("NOTIFICATION","Press the keybind in settings to activate")
-          end
-
-          else
-            Toggle1 = false   
-          end
- while Toggle1 do
-    wait()
-      pcall(function()
-     if Toggles["WalkSpeed Toggle"] == true and cantoggle == true then
-            local CurrentBoosts = game.Players.LocalPlayer.Character.Boosts
-            for n,v in pairs(ExploitBoosts) do
-                if CurrentBoosts:FindFirstChild(n) then
-                    CurrentBoosts[n].Value = v
-                end
-            end  
-        end
-    end)    
-end
-end)
-
-
-
-section2:addToggle("Player ESP", nil, function(r)
-if r then
-       if cantoggle == true then
-            Toggle5 = true 
-        end
-       
-        
-        if Toggles["PlayerESPToggle"] == false then
-             NOTIFICATION("NOTIFICATION","Press the keybind in settings to activate")
-         end
-        
-         else
-        Toggle5 = false
-    end
-end)
-
-
-section2:addToggle("Trinket ESP", nil, function(r)
-if r then
-        if cantoggle == true then
-        Toggle4 = true
-        end
-        
-         if Toggles["TrinketESPToggle"] == false then
-              NOTIFICATION("NOTIFICATION","Press the keybind in settings to activate")
-         end
-         else
-        Toggle4 = false
-    end
-end)
-
-
-section2:addToggle("Infinite Mana", nil, function(r)
-if r then
-           if cantoggle == true then
-        Toggle6 = true
-        end
-         if Toggles["Infinite Mana Toggle"] == false then
-              NOTIFICATION("NOTIFICATION","Press the keybind in settings to activate")
-         end
-         else
-        Toggle6 = false
-    end
-end)
-
-
-section3:addToggle("Full Bright", nil, function(r)
-if r then
-         Toggle2 = true
-        
-         game.Lighting.Brightness = 1
-         game.Lighting.Ambient = Color3.fromRGB(255, 255, 255) 
-         else
-         Toggle2 = false
-         
-         game.Lighting.Brightness = 0.12
-         game.Lighting.Ambient = Color3.fromRGB(20, 20, 20)
-         end
-end)
-
-section3:addToggle("No Fog", nil, function(r)
-if r then
-          Toggle3 = true
-          game.Lighting.FogEnd = 99999
-         game.Lighting.FogStart = 99999
-          else
-        Toggle3 = false
-         game.Lighting.FogEnd = 1125
-         game.Lighting.FogStart = 0
-    end
-end)
-
-
-section3:addButton("Infinite Bard", function()
-NOTIFICATION("NOTIFICATION","Activated | Cant Turn Off")
-
-
-game:GetService("Players").LocalPlayer.PlayerGui.BardGui.LocalScript.Button.Label:Destroy()
-game:GetService("Players").LocalPlayer.PlayerGui.BardGui.ErrorFrame:Destroy()
-end)
-
-section3:addButton("NO FALL DAMAGE", function()
-NOTIFICATION("NOTIFICATION","Activated | Cant Turn Off")
-
-
-loadstring(game:HttpGet("https://pastebin.com/raw/ERDp2x5W", true))()  
-end)
-
-
-     
-local page = venyx:addPage("Settings", 5012544693)
-local section1 = page:addSection("Settings")
-
-
-section1:addButton("Delete Gui", function()
-NOTIFICATION("NOTIFICATION","Successfully Deleted")
-venyx:deleteui()
-cantoggle = false
-ExploitBoosts["SpeedBoost"] = 0
-ExploitBoosts["ClimbBoost"] = 0
-FullBright = false
-ESPToggle = false
-MeasuredDistance = 0
-mana = false;
-oldBoosts = {}
-newBoosts = {}
-alreadyfalse = false;
-Toggle1 = false
-Toggle2 = false
-Toggle3 = false
-Toggle4 = false
-Toggle5 = false
-Toggle6 = false
-Toggles["TrinketESPToggle"] = false
-Toggles["Infinite Mana Toggle"] = false
-Toggles["WalkSpeed Toggle"] = false
-Toggles["PlayerESPToggle"] = false
-    spawn(function()
-       wait(5)
-        game.CoreGui.Sparrow:Destroy() 
-        venyx:deleteui()
-    end)
-end)
-
-section1:addKeybind("Minimize Key", Enum.KeyCode.Minus, function()
-if cantoggle then
-  venyx:toggle()  
-end
-end, function()
-end)
-
 
 section1:addKeybind("WalkSpeed Keybind", Enum.KeyCode.KeypadOne, function()
+  if cantoggle == false then return end
 if Toggle1 == true then
     
 if Toggles["WalkSpeed Toggle"] == false then
@@ -429,7 +299,7 @@ if Toggles["WalkSpeed Toggle"] == false then
                     oldBoosts["SpeedBoost"] = boost.Value
                 end
             end
-
+           
             for n,v in pairs(ExploitBoosts) do
                 if CurrentBoosts:FindFirstChild("SpeedBoost") then
                     CurrentBoosts["SpeedBoost"].Value = v
@@ -445,6 +315,7 @@ if Toggles["WalkSpeed Toggle"] == false then
  NOTIFICATION("NOTIFICATION","Turned Off")
    Toggles["WalkSpeed Toggle"] = false
     local CurrentBoosts = game.Players.LocalPlayer.Character.Boosts
+             pcall(function()
             for _,boost in pairs(CurrentBoosts:GetChildren()) do
                 if table.find(newBoosts, "SpeedBoost") then
                     boost:Destroy()
@@ -452,9 +323,8 @@ if Toggles["WalkSpeed Toggle"] == false then
                 if oldBoosts["SpeedBoost"] ~= nil then
                     boost.Value = oldBoosts["SpeedBoost"]
                 end
-            end
-            newBoosts = {}
-            oldBoosts = {}
+           end
+    end)
     end
 else
     NOTIFICATION("NOTIFICATION","Turn on the Toggle")
@@ -464,7 +334,169 @@ end, function()
 end)
 
 
-section1:addKeybind("Player ESP Keybind", Enum.KeyCode.KeypadTwo, function()
+
+section1:addToggle("Walk Speed", nil, function(r)
+  if cantoggle == false then return end
+if r then
+          Toggle1 = true
+         
+          if Toggles["WalkSpeed Toggle"] == true then
+              NOTIFICATION("NOTIFICATION","Turned On") 
+          end
+         
+         
+          if Toggles["WalkSpeed Toggle"] == false then
+            NOTIFICATION("NOTIFICATION","Press the keybind in settings to activate")
+          end
+
+          else
+            Toggle1 = false   
+          NOTIFICATION("NOTIFICATION","Turned Off")
+           local CurrentBoosts = game.Players.LocalPlayer.Character.Boosts
+             pcall(function()
+            for _,boost in pairs(CurrentBoosts:GetChildren()) do
+                if table.find(newBoosts, "SpeedBoost") then
+                    boost:Destroy()
+                end
+                if oldBoosts["SpeedBoost"] ~= nil then
+                    boost.Value = oldBoosts["SpeedBoost"]
+                end
+           end
+         end) 
+          end
+ while Toggle1 do
+    wait()
+      pcall(function()
+     if Toggles["WalkSpeed Toggle"] == true and cantoggle == true and Toggle1 == true then
+            local CurrentBoosts = game.Players.LocalPlayer.Character.Boosts
+            for n,v in pairs(ExploitBoosts) do
+                if CurrentBoosts:FindFirstChild("SpeedBoost") then
+                    CurrentBoosts["SpeedBoost"].Value = v
+                end
+            end  
+        end
+    end)    
+end
+end)
+
+
+
+
+
+
+
+section2:addSlider("Climb Speed", 0, 0, 10, function(value)
+ExploitBoosts["ClimbBoost"] = value
+end)
+
+
+
+section2:addKeybind("ClimbSpeed Keybind", Enum.KeyCode.KeypadTwo, function()
+  if cantoggle == false then return end
+if Toggle7 == true then
+    
+if Toggles["ClimbBoost Toggle"] == false then
+   Toggles["ClimbBoost Toggle"] = true
+     NOTIFICATION("NOTIFICATION","Turned On")
+            local CurrentBoosts = game.Players.LocalPlayer.Character.Boosts
+           
+            for _,boost in pairs(CurrentBoosts:GetChildren()) do
+                if ExploitBoosts["ClimbBoost"] ~= nil then
+                    oldBoosts["ClimbBoost"] = boost.Value
+                end
+            end
+
+            for n,v in pairs(ExploitBoosts) do
+                if CurrentBoosts:FindFirstChild("ClimbBoost") then
+                    CurrentBoosts["ClimbBoost"].Value = v
+                else
+                    local NewBoost = Instance.new("NumberValue")
+                    NewBoost.Parent = CurrentBoosts
+                    NewBoost.Name = "ClimbBoost"
+                    NewBoost.Value = v
+                    table.insert(newBoosts, n)
+                end
+            end  
+    else
+ NOTIFICATION("NOTIFICATION","Turned Off")
+   Toggles["ClimbBoost Toggle"] = false
+    local CurrentBoosts = game.Players.LocalPlayer.Character.Boosts
+ pcall(function()
+            for _,boost in pairs(CurrentBoosts:GetChildren()) do
+                if table.find(newBoosts, "ClimbBoost") then
+                    boost:Destroy()
+                end
+                if oldBoosts["ClimbBoost"] ~= nil then
+                    boost.Value = oldBoosts["ClimbBoost"]
+                end
+           end
+    end)
+    end
+else
+    NOTIFICATION("NOTIFICATION","Turn on the Toggle")
+end
+
+end, function()
+end)
+
+
+
+
+section2:addToggle("Climb Speed", nil, function(r)
+  if cantoggle == false then return end
+if r then
+          Toggle7 = true
+         
+          if Toggles["ClimbBoost Toggle"] == true then
+              NOTIFICATION("NOTIFICATION","Turned On") 
+          end
+         
+         
+          if Toggles["ClimbBoost Toggle"] == false then
+            NOTIFICATION("NOTIFICATION","Press the keybind in settings to activate")
+          end
+
+          else
+            Toggle7 = false   
+          NOTIFICATION("NOTIFICATION","Turned Off")
+          local CurrentBoosts = game.Players.LocalPlayer.Character.Boosts
+            pcall(function()
+            for _,boost in pairs(CurrentBoosts:GetChildren()) do
+                if table.find(newBoosts, "ClimbBoost") then
+                    boost:Destroy()
+                end
+                if oldBoosts["ClimbBoost"] ~= nil then
+                    boost.Value = oldBoosts["ClimbBoost"]
+                end
+           end
+          end)
+          end
+ while Toggle7 do
+    wait()
+      pcall(function()
+     if Toggles["ClimbBoost Toggle"] == true and cantoggle == true and Toggle7 == true then
+            local CurrentBoosts = game.Players.LocalPlayer.Character.Boosts
+            for n,v in pairs(ExploitBoosts) do
+                if CurrentBoosts:FindFirstChild("ClimbBoost") then
+                    CurrentBoosts["ClimbBoost"].Value = v
+                end
+            end  
+        end
+    end)    
+end
+end)
+
+
+
+
+
+section3:addSlider("Player ESP Distance", 0, 0, 5000, function(value)
+MeasuredDistance_PlayerESP = value
+end)
+
+
+section3:addKeybind("Player ESP Keybind", Enum.KeyCode.KeypadThree, function()
+  if cantoggle == false then return end
 if Toggle5 == true then
     
 if Toggles["PlayerESPToggle"] == false then
@@ -481,7 +513,38 @@ end, function()
 end)
 
 
-section1:addKeybind("Trinket ESP Keybind", Enum.KeyCode.KeypadThree, function()
+section3:addToggle("Player ESP", nil, function(r)
+  if cantoggle == false then return end
+if r then
+            Toggle5 = true 
+   
+       
+         if Toggles["PlayerESPToggle"] == true then
+              NOTIFICATION("NOTIFICATION","Turned On") 
+          end
+        
+        if Toggles["PlayerESPToggle"] == false then
+             NOTIFICATION("NOTIFICATION","Press the keybind in settings to activate")
+         end
+        
+         else
+        Toggle5 = false
+    NOTIFICATION("NOTIFICATION","Turned Off")
+    end
+end)
+
+
+
+
+
+
+section4:addSlider("Trinket ESP Distance", 0, 0, 5000, function(value)
+MeasuredDistance = value
+end)
+
+
+section4:addKeybind("Trinket ESP Keybind", Enum.KeyCode.KeypadFour, function()
+  if cantoggle == false then return end
 if Toggle4 == true then
     
 if Toggles["TrinketESPToggle"] == false then
@@ -497,7 +560,31 @@ end
 end, function()
 end)
 
-section1:addKeybind("Infinite Mana Keybind", Enum.KeyCode.KeypadFour, function()
+
+
+section4:addToggle("Trinket ESP", nil, function(r)
+  if cantoggle == false then return end
+if r then
+
+        Toggle4 = true
+        
+        if Toggles["TrinketESPToggle"] == true then
+              NOTIFICATION("NOTIFICATION","Turned On") 
+          end
+        
+         if Toggles["TrinketESPToggle"] == false then
+              NOTIFICATION("NOTIFICATION","Press the keybind in settings to activate")
+         end
+         else
+        Toggle4 = false
+   NOTIFICATION("NOTIFICATION","Turned Off")
+    end
+end)
+
+
+
+section5:addKeybind("Infinite Mana Keybind", Enum.KeyCode.KeypadFive, function()
+  if cantoggle == false then return end
 if Toggle6 == true then
     
 if Toggles["Infinite Mana Toggle"] == false then
@@ -507,7 +594,7 @@ if Toggles["Infinite Mana Toggle"] == false then
   spawn(function()
  
  while wait() do
-  if Toggles["Infinite Mana Toggle"] == true then
+  if Toggles["Infinite Mana Toggle"] == true and Toggle6 == true then
       pcall(function()
      if Character:FindFirstChild("Mana") then
         Character.Mana.Value = 100
@@ -535,6 +622,143 @@ end
     end
 else
 NOTIFICATION("NOTIFICATION","Turn on the Toggle")
+end
+end, function()
+end)
+
+
+
+section5:addToggle("Infinite Mana", nil, function(r)
+  if cantoggle == false then return end
+if r then
+        Toggle6 = true
+        
+        if Toggles["Infinite Mana Toggle"] == true then
+              NOTIFICATION("NOTIFICATION","Turned On") 
+          end
+        
+         if Toggles["Infinite Mana Toggle"] == false then
+              NOTIFICATION("NOTIFICATION","Press the keybind in settings to activate")
+         end
+         else
+        Toggle6 = false
+ NOTIFICATION("NOTIFICATION","Turned Off")
+    end
+end)
+
+
+
+
+section6:addToggle("Full Bright", nil, function(r)
+  if cantoggle == false then return end
+if r then
+         Toggle2 = true
+        
+         game.Lighting.Brightness = 1
+         game.Lighting.Ambient = Color3.fromRGB(255, 255, 255) 
+         else
+         Toggle2 = false
+         
+         game.Lighting.Brightness = 0.12
+         game.Lighting.Ambient = Color3.fromRGB(20, 20, 20)
+         end
+end)
+
+section6:addToggle("No Fog", nil, function(r)
+  if cantoggle == false then return end
+if r then
+
+          Toggle3 = true
+          game.Lighting.FogEnd = 99999
+         game.Lighting.FogStart = 99999
+          else
+        Toggle3 = false
+         game.Lighting.FogEnd = 1125
+         game.Lighting.FogStart = 0
+    end
+end)
+
+
+section6:addButton("Infinite Bard", function()
+NOTIFICATION("NOTIFICATION","Activated | Cant Turn Off")
+
+
+game:GetService("Players").LocalPlayer.PlayerGui.BardGui.LocalScript.Button.Label:Destroy()
+game:GetService("Players").LocalPlayer.PlayerGui.BardGui.ErrorFrame:Destroy()
+end)
+
+section6:addButton("NO FALL DAMAGE", function()
+NOTIFICATION("NOTIFICATION","Activated | Cant Turn Off")
+
+
+loadstring(game:HttpGet("https://pastebin.com/raw/ERDp2x5W", true))()  
+end)
+
+
+     
+local page = venyx:addPage("Settings", 5012544693)
+local section1 = page:addSection("Settings")
+
+
+section1:addButton("Delete Gui", function()
+NOTIFICATION("NOTIFICATION","Successfully Deleted")
+venyx:deleteui()
+cantoggle = false
+
+local CurrentBoosts = game.Players.LocalPlayer.Character.Boosts
+            pcall(function()
+            for _,boost in pairs(CurrentBoosts:GetChildren()) do
+                if table.find(newBoosts, "ClimbBoost") then
+                    boost:Destroy()
+                end
+                if oldBoosts["ClimbBoost"] ~= nil then
+                    boost.Value = oldBoosts["ClimbBoost"]
+                end
+           end
+      end)
+             pcall(function()
+            for _,boost in pairs(CurrentBoosts:GetChildren()) do
+                if table.find(newBoosts, "SpeedBoost") then
+                    boost:Destroy()
+                end
+                if oldBoosts["SpeedBoost"] ~= nil then
+                    boost.Value = oldBoosts["SpeedBoost"]
+                end
+           end
+     end)
+
+
+ExploitBoosts["SpeedBoost"] = 0
+ExploitBoosts["ClimbBoost"] = 0
+FullBright = false
+ESPToggle = false
+MeasuredDistance = 0
+MeasuredDistance_PlayerESP = 0
+mana = false;
+oldBoosts = {}
+newBoosts = {}
+alreadyfalse = false;
+Toggle1 = false
+Toggle2 = false
+Toggle3 = false
+Toggle4 = false
+Toggle5 = false
+Toggle6 = false
+Toggles["TrinketESPToggle"] = false
+Toggles["Infinite Mana Toggle"] = false
+Toggles["WalkSpeed Toggle"] = false
+Toggles["PlayerESPToggle"] = false
+Toggles["ClimbBoost Toggle"] = false
+    spawn(function()
+       wait(5)
+        game.CoreGui.Sparrow:Destroy() 
+        venyx:deleteui()
+    end)
+end)
+
+section1:addKeybind("Minimize Key", Enum.KeyCode.Minus, function()
+if cantoggle then
+  venyx:toggle()  
 end
 end, function()
 end)
