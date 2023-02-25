@@ -459,8 +459,21 @@ do
 	end
 	
          function library:deleteui()
-            print("delete plss")
-         end
+           local container = self.container.Main
+	   local topbar = container.TopBar
+        
+	   self.position = container.Position
+	   container.ClipsDescendants = true
+			
+	  utility:Tween(topbar, {Size = UDim2.new(1, 0, 1, 0)}, 0.2)
+	  wait(0.2)
+			
+	  utility:Tween(container, {
+		Size = UDim2.new(0, 511, 0, 0),
+		Position = self.position + UDim2.new(0, 0, 0, 428)
+	   }, 0.2)
+	  wait(0.2)
+	end
 	 
 	 
 	function library:toggle()
