@@ -596,11 +596,7 @@ do
 			Size = UDim2.new(0, 0, 0, 60),
 			Position = UDim2.new(1, 0, 0, 0)
 		}, 0.2)
-		
-		spawn(function()
-		wait(10)
-		close()
-		end)
+	
 		
 		-- callbacks
 		local active = true
@@ -617,17 +613,22 @@ do
 			notification.Flash.Position = UDim2.new(0, 0, 0, 0)
 			utility:Tween(notification.Flash, {Size = UDim2.new(1, 0, 1, 0)}, 0.2)
 			
-			wait(0.1)
+			wait(0.05)
 			utility:Tween(notification, {
 				Size = UDim2.new(0, 0, 0, 60),
 				Position = notification.Position + UDim2.new(0, textSize.X + 70, 0, 0)
-			}, 0.1)
+			}, 0.05)
 			
-			wait(0.1)
+			wait(0.05)
 			notification:Destroy()
 		end
 		
 		self.activeNotification = close
+		
+		spawn(function()
+		wait(4)
+		close()
+		end)
 		
 		notification.Accept.MouseButton1Click:Connect(function()
 		
