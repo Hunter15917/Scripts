@@ -613,20 +613,20 @@ do
 			notification.Flash.Position = UDim2.new(0, 0, 0, 0)
 			utility:Tween(notification.Flash, {Size = UDim2.new(1, 0, 1, 0)}, 0.2)
 			
-			wait(0.125)
+			wait(0.2)
 			utility:Tween(notification, {
 				Size = UDim2.new(0, 0, 0, 60),
 				Position = notification.Position + UDim2.new(0, textSize.X + 70, 0, 0)
-			}, 0.125)
+			}, 0.2)
 			
-			wait(0.125)
+			wait(0.2)
 			notification:Destroy()
 		end
 		
 		self.activeNotification = close
 		
 		spawn(function()
-		wait(3)
+		wait(2)
 		close()
 		end)
 		
