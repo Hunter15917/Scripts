@@ -565,7 +565,7 @@ do
 				Name = "Accept",
 				BackgroundTransparency = 1,
 				Position = UDim2.new(1, -26, 0, 8),
-				Size = UDim2.new(0, 16, 0, 16),
+				Size = UDim2.new(0, 25, 0, 25),
 				Image = "rbxassetid://5012538259",
 				ImageColor3 = themes.TextColor,
 				ZIndex = 4
@@ -613,20 +613,20 @@ do
 			notification.Flash.Position = UDim2.new(0, 0, 0, 0)
 			utility:Tween(notification.Flash, {Size = UDim2.new(1, 0, 1, 0)}, 0.2)
 			
-			wait(0.05)
+			wait(0.125)
 			utility:Tween(notification, {
 				Size = UDim2.new(0, 0, 0, 60),
 				Position = notification.Position + UDim2.new(0, textSize.X + 70, 0, 0)
-			}, 0.05)
+			}, 0.125)
 			
-			wait(0.05)
+			wait(0.125)
 			notification:Destroy()
 		end
 		
 		self.activeNotification = close
 		
 		spawn(function()
-		wait(4)
+		wait(3)
 		close()
 		end)
 		
