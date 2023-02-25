@@ -458,15 +458,15 @@ do
 		end
 	end
 	
-	function Library:DeleteUI()
-	print("Delete")
-	local container = self.container.Main
-	local topbar = container.TopBar
-	container.ClipsDescendants = true
+	--function library:DeleteUI()
+	--print("Delete")
+	--local container = self.container.Main
+	--local topbar = container.TopBar
+	--container.ClipsDescendants = true
 	
-	container:Destroy()
-	topbar:Destroy()
-	end
+	--container:Destroy()
+	--topbar:Destroy()
+	--end
 	
 	
 	function library:toggle()
