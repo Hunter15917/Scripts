@@ -458,7 +458,11 @@ do
 		end
 	end
 	
-
+         function library:deleteui()
+            print("delete plss")
+         end
+	 
+	 
 	function library:toggle()
 	
 		if self.toggling then
