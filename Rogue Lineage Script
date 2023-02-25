@@ -1,10 +1,27 @@
  for i,v in pairs(getconnections(game:GetService("ScriptContext").Error)) do 
         v:Disable()
-    end
+ end
+
+local wrksp = game:GetService("Workspace");
+local StarterGui = game:GetService("StarterGui")
+local UIS = game:GetService("UserInputService")
+
+local Player = game.Players.LocalPlayer
+
+if not Player.Character then
+     StarterGui:SetCore("SendNotification", {
+            Title = "NOTIFICATION";
+            Text = "PRESS PLAY FIRST";
+            Duration = 15;
+            Button1 = "REMOVE PROMPT"
+        })
+   return
+end
 
 
-local library = loadstring(game:HttpGet("https://pastebin.com/raw/6JKAWS08"))()
+local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Hunter15917/Scripts/main/MainGUI.md"))()
 local venyx = library.new("Sparrow", 5013109572)
+ 
  
 -- themes
        local themes = {
@@ -16,31 +33,35 @@ local venyx = library.new("Sparrow", 5013109572)
         TextColor = Color3.fromRGB(255, 255, 255)
 }
  
+ 
 -- first page
 local page = venyx:addPage("yerrrr", 5012544693)
 local section1 = page:addSection("Sliders")
 local section2 = page:addSection("Toggles")
 local section3 = page:addSection("Extras")
 
-local Player = game.Players.LocalPlayer
-local Character = Player.Character
 
-local wrksp = game:GetService("Workspace");
-local StarterGui = game:GetService("StarterGui")
+-- variables
+local Character = Player.Character 
+local HumanoidRootPart = Character.HumanoidRootPart
 local Camera = wrksp.CurrentCamera;
     
-local Walk = nil
 local WalkSpeed = nil;
 local FullBright = false
-local origwalkspeed = 0;
 
 local ESPToggle = false
 local MeasuredDistance = 0
 
-local Broke = false;
 local mana = false;
 local alreadyfalse = false;
+local cantoggle = true
 
+local MovementKeys = {
+    ["W"] = false,
+    ["A"] = false,
+    ["S"] = false,
+    ["D"] = false,
+}
 
 local Toggles = {
     ["TrinketESPToggle"] = false,
@@ -49,8 +70,8 @@ local Toggles = {
     ["PlayerESPToggle"] = false
     
 }
-local PlayerESPTable = {}
 
+local PlayerESPTable = {}
 
   local Meshes = {
         ["rbxassetid://16657069"] = "Money Bag",
@@ -77,7 +98,6 @@ local PlayerESPTable = {}
         ["rbxassetid://%205196776695%20"] = "Ring",
     
     }
-
 
 local function CreateTrinketESP(Object)
 local ESP = Drawing.new("Text")
@@ -123,7 +143,7 @@ rs = game:GetService("RunService").RenderStepped:Connect(function()
            DistanceDisplay:Remove()
            return 
       end
-      if onscreen and RoundedDistance <= MeasuredDistance and Toggles["TrinketESPToggle"] == true then
+      if onscreen and RoundedDistance <= MeasuredDistance and Toggles["TrinketESPToggle"] == true and cantoggle == true then
          ESP.Position = Vector2.new(realpos.X, realpos.Y)
          DistanceDisplay.Position = Vector2.new(realpos.X, realpos.Y) + Vector2.new(0, 15)
          DistanceDisplay.Text = tostring(RoundedDistance) 
@@ -161,7 +181,7 @@ local function PlayerESP(PlayerESP)
            Health:Remove()
         end                                                   
  
-        if table.find(PlayerESPTable, PlayerESP) and Toggles["PlayerESPToggle"] == true then
+        if table.find(PlayerESPTable, PlayerESP) and Toggles["PlayerESPToggle"] == true and cantoggle == true then
           local World_Pos, Onscreen = workspace.CurrentCamera:WorldToViewportPoint(PlayerESP.Character.Head.Position)
           
           if Onscreen then
@@ -187,29 +207,7 @@ local function PlayerESP(PlayerESP)
 end
 
 
-if Character.Boosts:FindFirstChild("SpeedBoost") == nil then
-local SpeedBoost = Instance.new("NumberValue")
-SpeedBoost.Value = 0
-SpeedBoost.Parent = Character.Boosts
-SpeedBoost.Name = "SpeedBoost"
-
-Walk = Character.Boosts.SpeedBoost
-end
-
-Player.CharacterAdded:Connect(function()
-if Character.Boosts:FindFirstChild("SpeedBoost") == nil then
-local SpeedBoost = Instance.new("NumberValue")
-SpeedBoost.Parent = Character.Boosts
-SpeedBoost.Name = "SpeedBoost"
-   
-Walk = SpeedBoost   
-   end
-end)
-
-origwalkspeed = Character.Boosts.SpeedBoost.Value
-
-
-section1:addSlider("Walk Speed", 0, 0, 75, function(value)
+section1:addSlider("Walk Speed", 0, 0, 100, function(value)
 WalkSpeed = value
 end)
 
@@ -217,20 +215,93 @@ section1:addSlider("Trinket ESP Distance", 0, 0, 5000, function(value)
 MeasuredDistance = value
 end)
 
+local function NOTIFICATION(Title, value)
+   spawn(function()
+    if cantoggle == true then
+        venyx:Notify(Title, value)  
+      end
+   end)
+end
+
+Character.Humanoid.Died:Connect(function()
+NOTIFICATION("NOTIFICATION","Re-Execute the script")
+venyx:deleteui()
+cantoggle = false
+WalkSpeed = nil;
+FullBright = false
+ESPToggle = false
+MeasuredDistance = 0
+mana = false;
+alreadyfalse = false;
+MovementKeys["W"] = false
+MovementKeys["A"] = false
+MovementKeys["S"] = false
+MovementKeys["D"] = false
+Toggles["TrinketESPToggle"] = false
+Toggles["Infinite Mana Toggle"] = false
+Toggles["WalkSpeed Toggle"] = false
+Toggles["PlayerESPToggle"] = false
+    spawn(function()
+       wait(5)
+        game.CoreGui.Sparrow:Destroy() 
+        venyx:deleteui()
+    end)
+end)
 
 
+local crossvectorrs
 
 section2:addToggle("Walk Speed", nil, function(r)
 if r then
           Toggle1 = true
+          
+          crossvectorrs = game:GetService("RunService").RenderStepped:Connect(function()
+               if Toggle1 == false then 
+                 crossvectorrs:Disconnect()
+                 crossvectorrs = nil
+                 end
+               
+               if MovementKeys["W"] == true or MovementKeys["A"] == true or  MovementKeys["S"] == true or MovementKeys["D"] == true then 
+               if Toggles["WalkSpeed Toggle"] == true then 
+                    pcall(function()
+               HumanoidRootPart.CFrame = CFrame.lookAt(HumanoidRootPart.Position, HumanoidRootPart.Position + 	workspace.CurrentCamera.CFrame.RightVector:Cross(Vector3.new(0, -10, 0)));
+                end)
+                end
+              
+             end
+          end)
+          
+          
+          if Toggles["WalkSpeed Toggle"] == false then
+            NOTIFICATION("NOTIFICATION","Press the keybind in settings to activate")
+          end
+          
           else
             Toggle1 = false   
          end
           while Toggle1 do
            wait()
+ 
        pcall(function()
-           if WalkSpeed ~= nil and Toggles["WalkSpeed Toggle"] == true then
-            Walk.Value = WalkSpeed 
+           if WalkSpeed ~= nil and Toggles["WalkSpeed Toggle"] == true and cantoggle == true then
+     local gameSettings = UserSettings().GameSettings
+   
+      if MovementKeys["W"] == true then
+        HumanoidRootPart.CFrame = HumanoidRootPart.CFrame + HumanoidRootPart.CFrame.lookVector * WalkSpeed / 6
+       gameSettings.RotationType = Enum.RotationType.CameraRelative
+       end
+   if MovementKeys["A"] == true then
+        HumanoidRootPart.CFrame = HumanoidRootPart.CFrame + HumanoidRootPart.CFrame.rightVector *- WalkSpeed / 6
+       gameSettings.RotationType = Enum.RotationType.CameraRelative
+       end
+     if MovementKeys["S"] == true then
+        HumanoidRootPart.CFrame = HumanoidRootPart.CFrame + HumanoidRootPart.CFrame.lookVector *- WalkSpeed / 6
+       gameSettings.RotationType = Enum.RotationType.CameraRelative
+       end
+    if MovementKeys["D"] == true then
+        HumanoidRootPart.CFrame = HumanoidRootPart.CFrame + HumanoidRootPart.CFrame.rightVector * WalkSpeed / 6
+       gameSettings.RotationType = Enum.RotationType.CameraRelative
+               end
             end
         end)
     end
@@ -240,7 +311,15 @@ end)
 
 section2:addToggle("Player ESP", nil, function(r)
 if r then
-        Toggle5 = true
+       if cantoggle == true then
+            Toggle5 = true 
+        end
+       
+        
+        if Toggles["PlayerESPToggle"] == false then
+             NOTIFICATION("NOTIFICATION","Press the keybind in settings to activate")
+         end
+        
          else
         Toggle5 = false
     end
@@ -249,7 +328,13 @@ end)
 
 section2:addToggle("Trinket ESP", nil, function(r)
 if r then
+        if cantoggle == true then
         Toggle4 = true
+        end
+        
+         if Toggles["TrinketESPToggle"] == false then
+              NOTIFICATION("NOTIFICATION","Press the keybind in settings to activate")
+         end
          else
         Toggle4 = false
     end
@@ -258,7 +343,12 @@ end)
 
 section2:addToggle("Infinite Mana", nil, function(r)
 if r then
+           if cantoggle == true then
         Toggle6 = true
+        end
+         if Toggles["Infinite Mana Toggle"] == false then
+              NOTIFICATION("NOTIFICATION","Press the keybind in settings to activate")
+         end
          else
         Toggle6 = false
     end
@@ -268,10 +358,12 @@ end)
 section3:addToggle("Full Bright", nil, function(r)
 if r then
          Toggle2 = true
+        
          game.Lighting.Brightness = 1
          game.Lighting.Ambient = Color3.fromRGB(255, 255, 255) 
          else
          Toggle2 = false
+         
          game.Lighting.Brightness = 0.12
          game.Lighting.Ambient = Color3.fromRGB(20, 20, 20)
          end
@@ -280,7 +372,7 @@ end)
 section3:addToggle("No Fog", nil, function(r)
 if r then
           Toggle3 = true
-         game.Lighting.FogEnd = 99999
+          game.Lighting.FogEnd = 99999
          game.Lighting.FogStart = 99999
           else
         Toggle3 = false
@@ -291,11 +383,17 @@ end)
 
 
 section3:addButton("Infinite Bard", function()
+NOTIFICATION("NOTIFICATION","Activated | Cant Turn Off")
+
+
 game:GetService("Players").LocalPlayer.PlayerGui.BardGui.LocalScript.Button.Label:Destroy()
 game:GetService("Players").LocalPlayer.PlayerGui.BardGui.ErrorFrame:Destroy()
 end)
 
 section3:addButton("NO FALL DAMAGE", function()
+NOTIFICATION("NOTIFICATION","Activated | Cant Turn Off")
+
+
 loadstring(game:HttpGet("https://pastebin.com/raw/ERDp2x5W", true))()  
 end)
 
@@ -306,10 +404,10 @@ local section1 = page:addSection("Settings")
 
 
 section1:addKeybind("Minimize Key", Enum.KeyCode.Minus, function()
-print("Activated Keybind")
-venyx:toggle()
+if cantoggle then
+  venyx:toggle()  
+end
 end, function()
-print("Changed Keybind")
 end)
 
 section1:addKeybind("WalkSpeed Keybind", Enum.KeyCode.KeypadOne, function()
@@ -317,11 +415,15 @@ if Toggle1 == true then
     
 if Toggles["WalkSpeed Toggle"] == false then
    Toggles["WalkSpeed Toggle"] = true
-    
+     NOTIFICATION("NOTIFICATION","Turned On")
     else
+ NOTIFICATION("NOTIFICATION","Turned Off")
    Toggles["WalkSpeed Toggle"] = false
-    Walk.Value = origwalkspeed 
+   local gameSettings = UserSettings().GameSettings
+   gameSettings.RotationType = Enum.RotationType.MovementRelative
     end
+else
+    NOTIFICATION("NOTIFICATION","Turn on the Toggle")
 end
 
 end, function()
@@ -333,10 +435,13 @@ if Toggle5 == true then
     
 if Toggles["PlayerESPToggle"] == false then
    Toggles["PlayerESPToggle"] = true
-    
+   NOTIFICATION("NOTIFICATION","Turned On")
     else
    Toggles["PlayerESPToggle"] = false
+NOTIFICATION("NOTIFICATION","Turned Off")
     end
+else
+    NOTIFICATION("NOTIFICATION","Turn on the Toggle")
 end
 end, function()
 end)
@@ -347,10 +452,13 @@ if Toggle4 == true then
     
 if Toggles["TrinketESPToggle"] == false then
    Toggles["TrinketESPToggle"] = true
-    
+     NOTIFICATION("NOTIFICATION","Turned On")
     else
+  NOTIFICATION("NOTIFICATION","Turned Off")
    Toggles["TrinketESPToggle"] = false
     end
+else
+   NOTIFICATION("NOTIFICATION","Turn on the Toggle")
 end
 end, function()
 end)
@@ -361,17 +469,22 @@ if Toggle6 == true then
 if Toggles["Infinite Mana Toggle"] == false then
    Toggles["Infinite Mana Toggle"] = true
     alreadyfalse = false
-    
+    NOTIFICATION("NOTIFICATION","Turned On")
   spawn(function()
+ 
  while wait() do
   if Toggles["Infinite Mana Toggle"] == true then
+      pcall(function()
      if Character:FindFirstChild("Mana") then
         Character.Mana.Value = 100
         end
+   end)
    else
       if alreadyfalse == false then
            alreadyfalse = true
+            pcall(function()
            Character.Mana.Value = 0
+           end)
            break
        end   
     end
@@ -380,12 +493,51 @@ end
 
     
    else
+   NOTIFICATION("NOTIFICATION","Turned Off")
    Toggles["Infinite Mana Toggle"] = false
+   pcall(function()
    Character.Mana.Value = 0
+    end)
     end
+else
+NOTIFICATION("NOTIFICATION","Turn on the Toggle")
 end
 end, function()
 end)
+
+UIS.InputBegan:Connect(function(input,typing)
+    if typing then return end
+
+    if input.KeyCode == Enum.KeyCode.W then
+        MovementKeys["W"] = true
+       print(MovementKeys["W"])
+    end
+    if input.KeyCode == Enum.KeyCode.A then
+        MovementKeys["A"] = true
+    end
+    if input.KeyCode == Enum.KeyCode.S then
+        MovementKeys["S"] = true
+    end
+    if input.KeyCode == Enum.KeyCode.D then
+        MovementKeys["D"] = true
+    end
+end)
+
+UIS.InputEnded:Connect(function(input,typing)
+    if input.KeyCode == Enum.KeyCode.W then
+        MovementKeys["W"] = false
+   end
+    if input.KeyCode == Enum.KeyCode.A then
+        MovementKeys["A"] = false
+    end
+    if input.KeyCode == Enum.KeyCode.S then
+        MovementKeys["S"] = false
+    end
+    if input.KeyCode == Enum.KeyCode.D then
+        MovementKeys["D"] = false
+        end
+    end)
+
 
 for i,Players in pairs(game:GetService("Players"):GetPlayers()) do
    if game.Players.LocalPlayer ~= Players then
