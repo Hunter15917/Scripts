@@ -385,7 +385,7 @@ end)
 
 
 
-section2:addKeybind("ClimbSpeed Keybind", Enum.KeyCode.KeypadOne, function()
+section2:addKeybind("ClimbSpeed Keybind", Enum.KeyCode.KeypadTwo, function()
   if cantoggle == false then return end
 if Toggle7 == true then
     
