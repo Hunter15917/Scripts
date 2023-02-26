@@ -106,7 +106,7 @@ if r then
           ts:Teleport(game.PlaceId, Player)
           game:GetService("Players").LocalPlayer.OnTeleport:Connect(function(State)
        syn.queue_on_teleport([[
-          
+          loadstring(game:HttpGet("https://raw.githubusercontent.com/Hunter15917/Scripts/main/Project%20Beatdown%20Script"))()
         ]])
     end)
           NOTIFICATION("NOTIFICATION", "Turned OFF")
