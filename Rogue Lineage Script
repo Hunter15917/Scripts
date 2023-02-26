@@ -225,27 +225,29 @@ NOTIFICATION("NOTIFICATION","Re-Execute the script")
 venyx:deleteui()
 cantoggle = false
 
-local CurrentBoosts = game.Players.LocalPlayer.Character.Boosts
-            pcall(function()
-            for _,boost in pairs(CurrentBoosts:GetChildren()) do
-                if table.find(newBoosts, "ClimbBoost") then
-                    boost:Destroy()
-                end
-                if oldBoosts["ClimbBoost"] ~= nil then
-                    boost.Value = oldBoosts["ClimbBoost"]
-                end
-           end
-      end)
-             pcall(function()
-            for _,boost in pairs(CurrentBoosts:GetChildren()) do
-                if table.find(newBoosts, "SpeedBoost") then
-                    boost:Destroy()
+
+ local CurrentBoosts = game.Players.LocalPlayer.Character.Boosts
+              
+              pcall(function()
+                 if newBoosts["SpeedBoost"] ~= nil then
+                    CurrentBoosts["SpeedBoost"]:Destroy()
+                    table.remove(newBoosts, "SpeedBoost")
                 end
                 if oldBoosts["SpeedBoost"] ~= nil then
-                    boost.Value = oldBoosts["SpeedBoost"]
+                 CurrentBoosts["SpeedBoost"].Value = oldBoosts["SpeedBoost"]
                 end
+             end)
+
+                 pcall(function()
+                 if newBoosts["ClimbBoost"] ~= nil then
+                   CurrentBoosts["ClimbBoost"]:Destroy()
+                    table.remove(newBoosts, "ClimbBoost")
+                end
+                if oldBoosts["ClimbBoost"] ~= nil then
+                 CurrentBoosts["ClimbBoost"].Value = oldBoosts["ClimbBoost"]
            end
-     end)
+       end)
+     
 ExploitBoosts["SpeedBoost"] = 0
 ExploitBoosts["ClimbBoost"] = 0
 FullBright = false
@@ -294,37 +296,33 @@ if Toggles["WalkSpeed Toggle"] == false then
    Toggles["WalkSpeed Toggle"] = true
      NOTIFICATION("NOTIFICATION","Turned On")
             local CurrentBoosts = game.Players.LocalPlayer.Character.Boosts
-            for _,boost in pairs(CurrentBoosts:GetChildren()) do
-                if ExploitBoosts["SpeedBoost"] ~= nil then
-                    oldBoosts["SpeedBoost"] = boost.Value
-                end
+              print("Found Boosts")
+              
+               
+             if ExploitBoosts["SpeedBoost"] ~= nil and CurrentBoosts:FindFirstChild("SpeedBoost") then
+                oldBoosts["SpeedBoost"] = CurrentBoosts["SpeedBoost"].Value
             end
-           
-            for n,v in pairs(ExploitBoosts) do
-                if CurrentBoosts:FindFirstChild("SpeedBoost") then
-                    CurrentBoosts["SpeedBoost"].Value = v
-                else
-                    local NewBoost = Instance.new("NumberValue")
-                    NewBoost.Parent = CurrentBoosts
-                    NewBoost.Name = "SpeedBoost"
-                    NewBoost.Value = v
-                    table.insert(newBoosts, n)
-                end
-            end  
+            if CurrentBoosts:FindFirstChild("SpeedBoost") then
+                CurrentBoosts["SpeedBoost"].Value = ExploitBoosts["SpeedBoost"]
+            elseif CurrentBoosts:FindFirstChild("SpeedBoost") == nil then
+                
+                local NewBoost1 = Instance.new("NumberValue")
+                NewBoost1.Parent = CurrentBoosts
+                NewBoost1.Name = "SpeedBoost"
+                NewBoost1.Value = ExploitBoosts["SpeedBoost"]
+                newBoosts["SpeedBoost"] = NewBoost1.Value
+            end
     else
  NOTIFICATION("NOTIFICATION","Turned Off")
    Toggles["WalkSpeed Toggle"] = false
     local CurrentBoosts = game.Players.LocalPlayer.Character.Boosts
-             pcall(function()
-            for _,boost in pairs(CurrentBoosts:GetChildren()) do
-                if table.find(newBoosts, "SpeedBoost") then
-                    boost:Destroy()
+                if newBoosts["SpeedBoost"] ~= nil then
+                    CurrentBoosts["SpeedBoost"]:Destroy()
+                    table.remove(newBoosts, "SpeedBoost")
                 end
                 if oldBoosts["SpeedBoost"] ~= nil then
-                    boost.Value = oldBoosts["SpeedBoost"]
-                end
-           end
-    end)
+                 CurrentBoosts["SpeedBoost"].Value = oldBoosts["SpeedBoost"]
+         end
     end
 else
     NOTIFICATION("NOTIFICATION","Turn on the Toggle")
@@ -352,28 +350,24 @@ if r then
           else
             Toggle1 = false   
           NOTIFICATION("NOTIFICATION","Turned Off")
+          Toggles["WalkSpeed Toggle"] = false
            local CurrentBoosts = game.Players.LocalPlayer.Character.Boosts
-             pcall(function()
-            for _,boost in pairs(CurrentBoosts:GetChildren()) do
-                if table.find(newBoosts, "SpeedBoost") then
-                    boost:Destroy()
+                 if newBoosts["SpeedBoost"] ~= nil then
+                    CurrentBoosts["SpeedBoost"]:Destroy()
+                    table.remove(newBoosts, "SpeedBoost")
                 end
                 if oldBoosts["SpeedBoost"] ~= nil then
-                    boost.Value = oldBoosts["SpeedBoost"]
-                end
-           end
-         end) 
-          end
+                 CurrentBoosts["SpeedBoost"].Value = oldBoosts["SpeedBoost"]
+         end
+    end
  while Toggle1 do
     wait()
       pcall(function()
      if Toggles["WalkSpeed Toggle"] == true and cantoggle == true and Toggle1 == true then
             local CurrentBoosts = game.Players.LocalPlayer.Character.Boosts
-            for n,v in pairs(ExploitBoosts) do
-                if CurrentBoosts:FindFirstChild("SpeedBoost") then
-                    CurrentBoosts["SpeedBoost"].Value = v
-                end
-            end  
+            if CurrentBoosts:FindFirstChild("SpeedBoost") then
+               CurrentBoosts["SpeedBoost"].Value = ExploitBoosts["SpeedBoost"]
+            end
         end
     end)    
 end
@@ -391,7 +385,7 @@ end)
 
 
 
-section2:addKeybind("ClimbSpeed Keybind", Enum.KeyCode.KeypadTwo, function()
+section2:addKeybind("ClimbSpeed Keybind", Enum.KeyCode.KeypadOne, function()
   if cantoggle == false then return end
 if Toggle7 == true then
     
@@ -399,38 +393,33 @@ if Toggles["ClimbBoost Toggle"] == false then
    Toggles["ClimbBoost Toggle"] = true
      NOTIFICATION("NOTIFICATION","Turned On")
             local CurrentBoosts = game.Players.LocalPlayer.Character.Boosts
-           
-            for _,boost in pairs(CurrentBoosts:GetChildren()) do
-                if ExploitBoosts["ClimbBoost"] ~= nil then
-                    oldBoosts["ClimbBoost"] = boost.Value
-                end
+               
+             if oldBoosts["ClimbBoost"] ~= nil and CurrentBoosts["ClimbBoost"] ~= nil then
+                oldBoosts["ClimbBoost"] = CurrentBoosts["ClimbBoost"].Value
             end
-
-            for n,v in pairs(ExploitBoosts) do
-                if CurrentBoosts:FindFirstChild("ClimbBoost") then
-                    CurrentBoosts["ClimbBoost"].Value = v
-                else
-                    local NewBoost = Instance.new("NumberValue")
-                    NewBoost.Parent = CurrentBoosts
-                    NewBoost.Name = "ClimbBoost"
-                    NewBoost.Value = v
-                    table.insert(newBoosts, n)
-                end
-            end  
+           
+            if CurrentBoosts:FindFirstChild("ClimbBoost") then
+                CurrentBoosts["ClimbBoost"].Value = ExploitBoosts["ClimbBoost"]
+            elseif CurrentBoosts:FindFirstChild("ClimbBoost") == nil then
+                local NewBoost1 = Instance.new("NumberValue")
+                NewBoost1.Parent = CurrentBoosts
+                NewBoost1.Name = "ClimbBoost"
+                NewBoost1.Value = ExploitBoosts["ClimbBoost"]
+                newBoosts["ClimbBoost"] = NewBoost1.Value
+            end
     else
  NOTIFICATION("NOTIFICATION","Turned Off")
    Toggles["ClimbBoost Toggle"] = false
     local CurrentBoosts = game.Players.LocalPlayer.Character.Boosts
- pcall(function()
-            for _,boost in pairs(CurrentBoosts:GetChildren()) do
-                if table.find(newBoosts, "ClimbBoost") then
-                    boost:Destroy()
+             pcall(function()
+                 if newBoosts["ClimbBoost"] ~= nil then
+                   CurrentBoosts["ClimbBoost"]:Destroy()
+                    table.remove(newBoosts, "ClimbBoost")
                 end
                 if oldBoosts["ClimbBoost"] ~= nil then
-                    boost.Value = oldBoosts["ClimbBoost"]
-                end
+                 CurrentBoosts["ClimbBoost"].Value = oldBoosts["ClimbBoost"]
            end
-    end)
+       end)
     end
 else
     NOTIFICATION("NOTIFICATION","Turn on the Toggle")
@@ -458,29 +447,27 @@ if r then
 
           else
             Toggle7 = false   
+           Toggles["ClimbBoost Toggle"] = false
           NOTIFICATION("NOTIFICATION","Turned Off")
-          local CurrentBoosts = game.Players.LocalPlayer.Character.Boosts
-            pcall(function()
-            for _,boost in pairs(CurrentBoosts:GetChildren()) do
-                if table.find(newBoosts, "ClimbBoost") then
-                    boost:Destroy()
+              local CurrentBoosts = game.Players.LocalPlayer.Character.Boosts
+             pcall(function()
+                 if newBoosts["ClimbBoost"] ~= nil then
+                   CurrentBoosts["ClimbBoost"]:Destroy()
+                    table.remove(newBoosts, "ClimbBoost")
                 end
                 if oldBoosts["ClimbBoost"] ~= nil then
-                    boost.Value = oldBoosts["ClimbBoost"]
-                end
+                 CurrentBoosts["ClimbBoost"].Value = oldBoosts["ClimbBoost"]
            end
-          end)
-          end
+       end)
+     end
  while Toggle7 do
     wait()
       pcall(function()
      if Toggles["ClimbBoost Toggle"] == true and cantoggle == true and Toggle7 == true then
             local CurrentBoosts = game.Players.LocalPlayer.Character.Boosts
-            for n,v in pairs(ExploitBoosts) do
-                if CurrentBoosts:FindFirstChild("ClimbBoost") then
-                    CurrentBoosts["ClimbBoost"].Value = v
-                end
-            end  
+            if CurrentBoosts:FindFirstChild("ClimbBoost") then
+               CurrentBoosts["ClimbBoost"].Value = ExploitBoosts["ClimbBoost"]
+            end
         end
     end)    
 end
@@ -716,27 +703,26 @@ venyx:deleteui()
 cantoggle = false
 
 local CurrentBoosts = game.Players.LocalPlayer.Character.Boosts
-            pcall(function()
-            for _,boost in pairs(CurrentBoosts:GetChildren()) do
-                if table.find(newBoosts, "ClimbBoost") then
-                    boost:Destroy()
-                end
-                if oldBoosts["ClimbBoost"] ~= nil then
-                    boost.Value = oldBoosts["ClimbBoost"]
-                end
-           end
-      end)
-             pcall(function()
-            for _,boost in pairs(CurrentBoosts:GetChildren()) do
-                if table.find(newBoosts, "SpeedBoost") then
-                    boost:Destroy()
+ pcall(function()
+                 if newBoosts["SpeedBoost"] ~= nil then
+                    CurrentBoosts["SpeedBoost"]:Destroy()
+                    table.remove(newBoosts, "SpeedBoost")
                 end
                 if oldBoosts["SpeedBoost"] ~= nil then
-                    boost.Value = oldBoosts["SpeedBoost"]
+                 CurrentBoosts["SpeedBoost"].Value = oldBoosts["SpeedBoost"]
                 end
-           end
-     end)
+             end)
 
+                 pcall(function()
+                 if newBoosts["ClimbBoost"] ~= nil then
+                   CurrentBoosts["ClimbBoost"]:Destroy()
+                    table.remove(newBoosts, "ClimbBoost")
+                end
+                if oldBoosts["ClimbBoost"] ~= nil then
+                 CurrentBoosts["ClimbBoost"].Value = oldBoosts["ClimbBoost"]
+           end
+       end)
+     
 
 ExploitBoosts["SpeedBoost"] = 0
 ExploitBoosts["ClimbBoost"] = 0
