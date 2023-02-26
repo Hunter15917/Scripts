@@ -662,6 +662,11 @@ if r then
          game.Lighting.Brightness = 0.12
          game.Lighting.Ambient = Color3.fromRGB(20, 20, 20)
          end
+   while Toggle2 do
+         game.Lighting.Brightness = 1
+         game.Lighting.Ambient = Color3.fromRGB(255, 255, 255) 
+         wait()
+    end
 end)
 
 section6:addToggle("No Fog", nil, function(r)
@@ -676,6 +681,11 @@ if r then
          game.Lighting.FogEnd = 1125
          game.Lighting.FogStart = 0
     end
+ while toggle3 do
+     wait()
+      game.Lighting.FogEnd = 99999
+      game.Lighting.FogStart = 99999
+     end
 end)
 
 
