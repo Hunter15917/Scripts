@@ -10,34 +10,444 @@ Player.CharacterAdded:Connect(function()
     PlrChar = Player.Character 
 end)
 
-
 -- illu variables
 local All_illus = {}
 local Spectating = {}
 local NonSpectator = {}
 
--- tables
-local KillBricks = {}
-
 
 -- Toggles
 local can_GetNotifiedIllu = false
 local anti_fire = false
-local anti_fireCD = false
 local can_spectate = false
 local full_Bright = false
 local no_Fog = false
 local fall_Damage = false
+local chat_Logger = false
+local chatlogger_AutoScroll = false
+local player_ESP = false
+local ore_ESP = false
+local trinket_ESP = false
+ 
+local Meshes = {
+    ["rbxassetid://16657069"] = "Money Bag",
+    ["rbxassetid://60791940"] = "Scroll",
+    ["rbxassetid://2877143560"] = "Jewel",
+    ["rbxassetid://2637545558"] = "Ring",
+    ["rbxassetid://439102658"] = "Phoenix Feather",
+    ["rbxassetid://13116112"] = "Goblet",
+    ["rbxassetid://5196577540"] = "Amulet",
+    ["rbxassetid://5204003946"] = "Goblet",
+    ["rbxassetid://5204453430"] = "Scroll",
+    ["rbxassetid://5196782997"] = "Old Ring",
+    ["rbxassetid://%2016657069%20"] = "Money Bag",
+    ["rbxassetid://%2060791940%20"] = "Scroll",
+    ["rbxassetid://%202877143560%20"] = "Jewel",
+    ["rbxassetid://%202637545558%20"] = "Ring",
+    ["rbxassetid://%20439102658%20"] = "Phoenix Feather",
+    ["rbxassetid://%2013116112%20"] = "Goblet",
+    ["rbxassetid://%205196577540%20"] = "Amulet",
+    ["rbxassetid://%205204003946%20"] = "Goblet",
+    ["rbxassetid://%205204453430%20"] = "Scroll",
+    ["rbxassetid://%205196782997%20"] = "Old Ring",
+    ["rbxassetid://5196776695"] = "Ring",
+    ["rbxassetid://%205196776695%20"] = "Ring",
+} 
+ 
+ 
  
 -- Services
 local UIS = game:GetService("UserInputService")
 local StarterGui = game:GetService("StarterGui")
 local RunService = game:GetService("RunService")
 
+
+-- if Player.PlayerGui:FindFirstChild("LeaderboardGui") == nil then
+--    StarterGui.LeaderboardGui.Parent = Player.PlayerGui
+-- end
+
+
+-- chat logger gui  
+
+
+local ChatLoggerScreenUI = Instance.new("ScreenGui")
+ChatLoggerScreenUI.Parent = game.CoreGui
+ChatLoggerScreenUI.IgnoreGuiInset = true
+ChatLoggerScreenUI.ResetOnSpawn = true
+ChatLoggerScreenUI.Enabled = false
+ChatLoggerScreenUI.Archivable = true
+ChatLoggerScreenUI.Name = "Chatlogger"
+
+local ChatLogger_Main = Instance.new("Frame")
+ChatLogger_Main.Parent = ChatLoggerScreenUI
+ChatLogger_Main.BackgroundColor3 = Color3.fromRGB(30,30,30)
+ChatLogger_Main.Position = UDim2.new(0,100,0,100)
+ChatLogger_Main.BackgroundTransparency = .3
+ChatLogger_Main.Size = UDim2.new(0, 600, 0, 300)
+ChatLogger_Main.Name = "Main"
+ChatLogger_Main.Name = "ChatLogger"
+
+
+local ChatLogger_Line = Instance.new("Frame")
+ChatLogger_Line.Parent = ChatLogger_Main
+ChatLogger_Line.BackgroundColor3 = Color3.fromRGB(255,255,255)
+ChatLogger_Line.Position = UDim2.new(0,-10,0,30)
+ChatLogger_Line.BackgroundTransparency = 0
+ChatLogger_Line.Size = UDim2.new(0, 600, 0, 0)
+ChatLogger_Line.Name = "Line"
+ChatLogger_Line.BorderColor = ChatLogger_Line.BackgroundColor
+
+local ChatLogger_Name = Instance.new("TextLabel")
+ChatLogger_Name.Parent = ChatLogger_Main
+ChatLogger_Name.Text = "Chat Logger"
+ChatLogger_Name.Position = UDim2.new(0,13,0,12)
+ChatLogger_Name.TextSize = 20
+ChatLogger_Name.Size = UDim2.new(0,550,0,0)
+ChatLogger_Name.BackgroundTransparency = 1
+ChatLogger_Name.TextColor3 = Color3.fromRGB(255,255,255)
+
+
+local ChatLogger_Drag = Instance.new("TextButton")
+ChatLogger_Drag.Parent = ChatLogger_Main
+ChatLogger_Drag.Text = "Drag"
+ChatLogger_Drag.Position = UDim2.new(0,-7.15,0,-7)
+ChatLogger_Drag.Size = UDim2.new(0,595,0,32)
+ChatLogger_Drag.BackgroundTransparency = 1
+ChatLogger_Drag.ZIndex = 99999999
+ChatLogger_Drag.Text = ""
+ChatLogger_Drag.Name = "Drag"
+
+local ScrollingFrameHolder = Instance.new("ScrollingFrame")
+ScrollingFrameHolder.Parent = ChatLogger_Main
+ScrollingFrameHolder.Size = UDim2.new(0, 575, 0, 230)
+ScrollingFrameHolder.Position = UDim2.new(0,5,0,45)
+ScrollingFrameHolder.BorderSizePixel = 0
+ScrollingFrameHolder.BackgroundTransparency = .9
+ScrollingFrameHolder.ScrollBarThickness = 4
+ScrollingFrameHolder.CanvasSize = UDim2.new(0, 0,4, 0)
+
+local ScrollingFrameUIList = Instance.new("UIListLayout")
+ScrollingFrameUIList.Parent = ScrollingFrameHolder
+
+local UIStroke = Instance.new("UIStroke")
+UIStroke.Enabled = true
+UIStroke.Parent = ChatLogger_Main
+UIStroke.Color = Color3.fromRGB(255,255,255)
+UIStroke.Thickness = 1.5
+
+local UIPadding = Instance.new("UIPadding")
+UIPadding.Parent = ChatLogger_Main
+UIPadding.PaddingBottom = UDim.new(0, 10)
+UIPadding.PaddingLeft = UDim.new(0, 10)
+UIPadding.PaddingRight = UDim.new(0, 10)
+UIPadding.PaddingTop = UDim.new(0, 10)
+
+ScrollingFrameHolder.CanvasSize = UDim2.new(0, 0, 0, ScrollingFrameUIList.AbsoluteContentSize.Y)
+ScrollingFrameHolder.CanvasPosition = Vector2.new(0, ScrollingFrameUIList.AbsoluteContentSize.Y + 75)
+
+ScrollingFrameUIList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+	ScrollingFrameHolder.CanvasSize = UDim2.new(0, 0, 0, ScrollingFrameUIList.AbsoluteContentSize.Y)
+end)
+ScrollingFrameUIList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+	if chatlogger_AutoScroll == true then
+	ScrollingFrameHolder.CanvasPosition = Vector2.new(0, ScrollingFrameUIList.AbsoluteContentSize.Y + 75)
+    end
+end)
+
+
+local gui = ChatLogger_Main
+local dragging
+local dragInput
+local dragStart
+local startPos
+function Lerp(a, b, m)
+	return a + (b - a) * m
+end;
+local lastMousePos
+local lastGoalPos
+local DRAG_SPEED = (8); -- // The speed of the UI darg.
+function Update(dt)
+	if not (startPos) then return end;
+	if not (dragging) and (lastGoalPos) then
+		gui.Position = UDim2.new(startPos.X.Scale, Lerp(gui.Position.X.Offset, lastGoalPos.X.Offset, dt * DRAG_SPEED), startPos.Y.Scale, Lerp(gui.Position.Y.Offset, lastGoalPos.Y.Offset, dt * DRAG_SPEED))
+		return 
+	end;
+
+	local delta = (lastMousePos - UIS:GetMouseLocation())
+	local xGoal = (startPos.X.Offset - delta.X);
+	local yGoal = (startPos.Y.Offset - delta.Y);
+	lastGoalPos = UDim2.new(startPos.X.Scale, xGoal, startPos.Y.Scale, yGoal)
+	gui.Position = UDim2.new(startPos.X.Scale, Lerp(gui.Position.X.Offset, xGoal, dt * DRAG_SPEED), startPos.Y.Scale, Lerp(gui.Position.Y.Offset, yGoal, dt * DRAG_SPEED))
+end;
+
+gui.Drag.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+		dragging = true
+		dragStart = input.Position
+		startPos = gui.Position
+		lastMousePos = UIS:GetMouseLocation()
+
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				dragging = false
+			end
+		end)
+	end
+end)
+gui.Drag.InputChanged:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+		dragInput = input
+	end
+end)
+RunService.Heartbeat:Connect(Update)
+
+
+
 -- functions
 
+
+
+local function CreateTrinketESP(Object)
+	local ESP = Drawing.new("Text")
+	ESP.Color = Color3.fromRGB(255,255,255)
+	ESP.Size = 17
+	ESP.Outline = true
+	ESP.Center = true
+	ESP.Visible = true
+	ESP.Font = 0
+
+	local DistanceDisplay = Drawing.new("Text")
+	DistanceDisplay.Color = Color3.fromRGB(192,192,192)
+	DistanceDisplay.Size = 17
+	DistanceDisplay.Outline = true
+	DistanceDisplay.Center = true
+	DistanceDisplay.Visible = true
+	DistanceDisplay.Font = 0
+
+	pcall(function()
+		if Object.Parent:IsA("MeshPart") and Meshes[Object.Parent.MeshId]  then 
+			ESP.Text = tostring(Meshes[Object.Parent.MeshId]) 
+		elseif Object.Parent:IsA("Part") and Object.Parent:FindFirstChildWhichIsA("SpecialMesh") and Meshes[Object.Parent:FindFirstChildWhichIsA("SpecialMesh").MeshId] then
+			ESP.Text = tostring(Meshes[Object.Parent:FindFirstChildWhichIsA("SpecialMesh").MeshId])
+		elseif Object.Parent:IsA("Part") and Object.Parent:FindFirstChildWhichIsA("SpecialMesh") and Object.Parent:FindFirstChild("OrbParticle") then
+			ESP.Text = tostring("???")
+		else
+			ESP.Text = tostring("Opal")
+		end
+	end)
+
+
+
+	local rs 
+	rs = game:GetService("RunService").RenderStepped:Connect(function()
+		local realpos, onscreen = workspace.CurrentCamera:WorldToViewportPoint(Object.Position)
+		local RoundedDistance = math.floor((game.workspace.CurrentCamera.CFrame.Position - Object.Position).Magnitude + 0.5)  
+
+
+		if not Object:IsDescendantOf(workspace) then
+			rs:Disconnect();
+			ESP:Remove()
+			DistanceDisplay:Remove()
+			return 
+		end
+		if onscreen and trinket_ESP then
+			ESP.Position = Vector2.new(realpos.X, realpos.Y)
+			DistanceDisplay.Position = Vector2.new(realpos.X, realpos.Y) + Vector2.new(0, 15)
+			DistanceDisplay.Text = tostring(RoundedDistance) 
+
+			ESP.Visible = true
+			DistanceDisplay.Visible = true
+		else
+			ESP.Visible = false
+			DistanceDisplay.Visible = false
+		end 
+	end)
+end
+
+
+local function Ore_ESP(Ore)
+	local Name_Distance = Drawing.new("Text")
+	Name_Distance.Size = 15
+	Name_Distance.Center = true
+	Name_Distance.Outline = true
+	Name_Distance.Font = 0;
+
+	local Health = Drawing.new("Text")
+	Health.Size = 15
+	Health.Center = true
+	Health.Outline = true
+	Health.Font = 0;
+
+	Name_Distance.Color = Ore.Color
+	Health.Color = Ore.Color
+
+	local RS 
+	RS = game:GetService("RunService").RenderStepped:Connect(function()
+		if not Ore then 
+			Name_Distance:Remove()
+			Health:Remove()
+
+			RS:Disconnect() 
+		end
+
+		if not Ore then return end
+		local World_Pos, Onscreen = workspace.CurrentCamera:WorldToViewportPoint(Ore.Position)
+
+		if Onscreen and ore_ESP then
+			Name_Distance.Text = "|"..Ore.Name.."| |"..math.floor((Ore.Position - game.workspace.CurrentCamera.CFrame.Position).Magnitude + .5).."|"  
+			Health.Text = "|"..math.floor(Ore.OreLife.Value + .5).."/"..math.floor(Ore.MaxLife.Value + .5).."| |"..math.floor(Ore.OreLife.Value / Ore.MaxLife.Value * 100 + .5)
+
+			Health.Position = Vector2.new(World_Pos.X, World_Pos.Y) - Vector2.new(0,45)
+			Name_Distance.Position = Vector2.new(World_Pos.X, World_Pos.Y) - Vector2.new(0,60)
+			Health.Visible = true
+			Name_Distance.Visible = true
+		else
+			Health.Visible = false
+			Name_Distance.Visible = false
+		end
+	end)
+end
+
+
+local function Player_ESP(PlrESP)
+    if PlrESP == Player then return end
+	local Name_Distance = Drawing.new("Text")
+	Name_Distance.Size = 16
+	Name_Distance.Center = true
+	Name_Distance.Outline = true
+	Name_Distance.Font = 0;
+	Name_Distance.Color = Color3.fromRGB(255, 255, 255)
+
+	local Health_Percentage = Drawing.new("Text")
+	Health_Percentage.Size = 16
+	Health_Percentage.Center = true
+	Health_Percentage.Outline = true
+	Health_Percentage.Font = 0;
+	Health_Percentage.Color = Color3.fromRGB(255, 255, 255)
+
+	local Holding = Drawing.new("Text")
+	Holding.Size = 16
+	Holding.Center = true
+	Holding.Outline = true
+	Holding.Font = 0;
+	Holding.Color = Color3.fromRGB(255, 255, 255)
+	local HoldingItem = "None" 
+
+	local RS 
+	local ChildAdded = nil
+	local ChildRemoved = nil
+
+	RS = game:GetService("RunService").RenderStepped:Connect(function()
+		if not PlrESP then 
+			Name_Distance:Remove()
+			Health_Percentage:Remove()
+			Holding:Remove() 
+
+			RS:Disconnect() 
+		end
+		if not PlrESP then return end
+
+		if PlrESP.Character and player_ESP == true then
+			local World_Pos, Onscreen = workspace.CurrentCamera:WorldToViewportPoint(PlrESP.Character.Head.Position)
+
+			if ChildAdded == nil then
+				ChildAdded = PlrESP.Character.ChildAdded:Connect(function(ItemAdded)
+					if ItemAdded:IsA("Tool") then
+						HoldingItem = ItemAdded.Name
+					end
+				end)
+			end
+			if ChildRemoved == nil then
+				ChildRemoved = PlrESP.Character.ChildRemoved:Connect(function(ItemRemoved)
+					if ItemRemoved:IsA("Tool") and ItemRemoved.Name == HoldingItem.Name then
+						HoldingItem = "None"
+					end
+				end)
+			end
+			if Onscreen then
+				Name_Distance.Text = "|"..PlrESP.Name.."| |"..math.floor((PlrESP.Character.HumanoidRootPart.Position - game.workspace.CurrentCamera.CFrame.Position).Magnitude + .5).."|"  
+				Health_Percentage.Text = "|"..math.floor(PlrESP.Character.Humanoid.Health + .5).."/"..math.floor(PlrESP.Character.Humanoid.MaxHealth + .5).."| |"..math.floor(PlrESP.Character.Humanoid.Health / PlrESP.Character.Humanoid.MaxHealth * 100 + .5)
+				Holding.Text = "|"..tostring(HoldingItem).."|"
+
+				Holding.Position = Vector2.new(World_Pos.X, World_Pos.Y) - Vector2.new(0,100)
+				Health_Percentage.Position = Vector2.new(World_Pos.X, World_Pos.Y) - Vector2.new(0,115)
+				Name_Distance.Position = Vector2.new(World_Pos.X, World_Pos.Y) - Vector2.new(0,130)
+
+				Holding.Visible = true
+				Name_Distance.Visible = true
+				Health_Percentage.Visible = true
+			else
+				Holding.Visible = false
+				Name_Distance.Visible = false 
+				Health_Percentage.Visible = false
+			end
+		else
+			Holding.Visible = false
+			Name_Distance.Visible = false 
+			Health_Percentage.Visible = false
+		end
+	end)
+end
+
+
+local function UpdateChatlogger(PlrChatted)
+	PlrChatted.Chatted:Connect(function(msg)
+		local SpawnedIn = false
+
+		if PlrChatted.Character then
+			SpawnedIn = true
+		end
+
+		local TextLabel = Instance.new("TextLabel")
+		TextLabel.Parent = ScrollingFrameHolder
+		TextLabel.TextSize = 14
+		TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+		TextLabel.Size = UDim2.new(0, 430,0, 30)
+		TextLabel.TextXAlignment = Enum.TextXAlignment.Left
+		TextLabel.BackgroundTransparency = 1
+		TextLabel.AutomaticSize = Enum.AutomaticSize.Y
+		TextLabel.TextWrapped = true
+
+		if TextLabel.TextColor3 ~= Color3.fromRGB(255, 0, 4) then
+			if PlrChatted.Backpack:FindFirstChild("Observe") then
+				TextLabel.TextColor3 = Color3.fromRGB(255, 128, 0)
+			end
+			if SpawnedIn then
+				if PlrChatted.Character:FindFirstChild("Observe") then
+					TextLabel.TextColor3 = Color3.fromRGB(255, 128, 0)
+				end
+			end
+		end
+		if PlrChatted.Name == game.Players.LocalPlayer.Name then
+			TextLabel.TextColor3 = Color3.fromRGB(255,255,0)
+		end
+		if SpawnedIn == false then
+			TextLabel.Text = "[Not Spawned In] "..PlrChatted:GetAttribute("FirstName").." - "..msg
+		else
+			TextLabel.Text = PlrChatted:GetAttribute("FirstName").." - "..msg
+		end
+
+		TextLabel.Size = UDim2.new(0,430,0,TextLabel.TextBounds.Y + 5)
+		TextLabel.MouseEnter:Connect(function()
+			if SpawnedIn == false then
+				TextLabel.Text = "[Not Spawned In] "..PlrChatted.Name.." - "..msg
+			else
+				TextLabel.Text = PlrChatted.Name.." - "..msg
+			end
+		end)
+		TextLabel.MouseLeave:Connect(function()
+			if SpawnedIn == false then
+				TextLabel.Text = "[Not Spawned In] "..PlrChatted:GetAttribute("FirstName").." - "..msg
+			else
+				TextLabel.Text = PlrChatted:GetAttribute("FirstName").." - "..msg
+			end
+		end)
+	end)
+end
+
+
+
 local function Notify(Title1, Text1, Duration1, For)
-    print(Text1, can_GetNotifiedIllu)
     if For == "illusionist" then
       if can_GetNotifiedIllu == true then
           StarterGui:SetCore("SendNotification", {
@@ -58,7 +468,7 @@ local function Notify(Title1, Text1, Duration1, For)
 end
 
 local function PlayerLeft(PlrLeft)
-    if table.find(All_illus, PlrLeft) then
+	if table.find(All_illus, PlrLeft) then
 		for i,v in pairs(All_illus) do
 			if v == PlrLeft then
 				table.remove(All_illus, i)
@@ -77,9 +487,14 @@ local function PlayerLeft(PlrLeft)
 		for i,v in pairs(Spectating) do
 			if v == PlrLeft then
 				table.remove(Spectating, i)
-			 end
-	   	 end
-	  end
+			end
+		end
+	end
+end
+
+local function PlayerAdded(PlrAdded)
+    UpdateChatlogger(PlrAdded)
+    Player_ESP(PlrAdded)
 end
 
 local function get_player(player_name)
@@ -91,14 +506,14 @@ local function get_player(player_name)
     end
 end
 
-local hook = hookfunction or detour_function
-local old 
-old = hook(Instance.new("RemoteEvent").FireServer, function(self,...)
+
+ local hook = hookfunction or detour_function
+ local old 
+ old = hook(Instance.new("RemoteEvent").FireServer, function(self,...)
     local args = {...}
     
     if PlrChar ~= nil and PlrChar:FindFirstChild("CharacterHandler") and PlrChar.CharacterHandler:FindFirstChild("Remotes") and self.Parent == PlrChar.CharacterHandler.Remotes then
         if #args == 2 and typeof(args[2]) == "table" and fall_Damage == true then
-            print("returned nil")
             return nil
         end
     end
@@ -120,7 +535,7 @@ spawn(function()
      -- anti fire   
      if PlrChar then 
      if anti_fire == true and PlrChar:FindFirstChild("Burning") then 
-            -- For i,v loop on all remotes
+           --  For i,v loop on all remotes
             for i,v in pairs(Player.Character.CharacterHandler.Remotes:GetChildren()) do
                 if (tostring(v):len() == 40 or tostring(v) == "Dodge") then
                      v:FireServer({math.random(1, 4), 0});
@@ -163,10 +578,23 @@ spawn(function()
         end
     end
 end)
+
 game.Players.PlayerRemoving:Connect(function(PlrLeft)
 	PlayerLeft(PlrLeft)
 end)
-
+game.Players.PlayerAdded:Connect(function(PlrAdded)
+    PlayerAdded(PlrAdded)
+end)
+for i,v in pairs(game.Players:GetPlayers()) do
+   UpdateChatlogger(v)
+   Player_ESP(v)
+end
+for i,v in pairs(game.workspace.Ores:GetChildren()) do
+    Ore_ESP(v)
+end
+game.workspace.Ores.ChildAdded:Connect(function(ItemAdded)
+    Ore_ESP(ItemAdded)
+end)
 
 -- library.Extension = "txt" (config file extension)
 -- library.Folder = "config folder name"
@@ -175,8 +603,8 @@ local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/vozoi
 
 local main = library:Load{
     Name = "Sparrow",
-    SizeX = 750,
-    SizeY = 600,
+    SizeX = 500,
+    SizeY = 450,
     Theme = "Midnight",
     Extension = "json", -- config file extension
     Folder = "Sparrow" -- config folder name
@@ -191,131 +619,108 @@ local section = tab:Section{
 
 --label:Set("Label Set")
 
+
+local seperator = section:Separator("ESP")
+
+
 local toggle = section:Toggle{
-    Name = "Illusionist Notifier",
+    Name = "Player ESP",
     Flag = "Toggle 1",
     --Default = true,
    Callback  = function(bool)
     if bool == true then
-        can_GetNotifiedIllu = true
-        
-   for i,v in pairs(game.Players:GetPlayers()) do
-           if table.find(All_illus, v) then
-				Notify("illusionist Detected",v.Name.." is a illusionist.",20,"illusionist")
-			end
-		   if table.find(Spectating, v) then
-            Notify("illusionist Specating",v.Name.." is a illusionist.",20,"illusionist")
-		    end 
-        end
-        else
-        can_GetNotifiedIllu = false
+       player_ESP = true
+    else
+       player_ESP = false
        end
   end
 }
 
+
 local toggle = section:Toggle{
-    Name = "No Fall Damage",
+    Name = "Ore ESP",
     Flag = "Toggle 2",
     --Default = true,
    Callback  = function(bool)
     if bool == true then
-        fall_Damage = true
-        else
-        fall_Damage = false
+       ore_ESP = true
+    else
+       ore_ESP = false
        end
   end
 }
 
+
 local toggle = section:Toggle{
-    Name = "Spectate",
+    Name = "Trinket ESP",
     Flag = "Toggle 3",
     --Default = true,
    Callback  = function(bool)
     if bool == true then
-       Notify("NOTIFICATION","Works just like illusionist",20,"NOTIFICATION")
-        can_spectate = Player.Chatted:Connect(function(msg)
-        if can_spectate ~= false then
-          local plr = get_player(msg)
-        if plr.Character then
-          	game.workspace.Camera.CameraType = "Custom"
-        	game.workspace.Camera.CameraSubject = plr.Character.Humanoid
-        end
-    end
-end)
-        
-        else
-         if can_spectate ~= false then
-            can_spectate:Disconnect()
-            can_spectate = false
-            game.workspace.Camera.CameraType = "Custom"
-        	game.workspace.Camera.CameraSubject = PlrChar
-         end
-      end
-  end
-}
-
-
-section:Button{
-    Name = "Respawn",
-    Callback  = function()
-     if PlrChar then
-         PlrChar.Humanoid.Health = 0
-       end
-    end
-}
-
-
-local seperator = section:Separator("Separator")
---separator:Set("Separator Set")
-
-
-local section_1 = tab:Section{
-    Name = "Secondary",
-    Side = "Right"
-}
-
-
-local toggle = section_1:Toggle{
-    Name = "Remove Kill Bricks",
-    Flag = "Toggle 4",
-    --Default = true,
-   Callback  = function(bool)
-    if bool == true then
-        for i,v in pairs(game.Workspace:GetDescendants()) do
-          if v.Name == "Lava" or v.Name == "KillBrick" or v.Name == "PitKillBrick" or v.Name == "PoisonField" then
-            if v:FindFirstChild("TouchInterest") then
-                if not table.find(KillBricks, v) then
-                   table.insert(KillBricks, v)
-                end
-                v.Parent = nil
-                end
-            end  
-        end
-        else
-        for i,v in pairs(KillBricks) do
-             v.Parent = game.Workspace
-         end 
-      end
-  end
-}
-
-
-local toggle = section_1:Toggle{
-    Name = "Anti-Fire",
-    Flag = "Toggle 5",
-    --Default = true,
-   Callback  = function(bool)
-    if bool == true then
-        anti_fire = true
-        else
-        anti_fire = false
-        anti_fireCD = false
+       trinket_ESP = true
+    else
+       trinket_ESP = false
        end
   end
 }
 
 
-local toggle = section_1:Toggle{
+local seperator = section:Separator("Useful Toggles")
+
+
+local toggle = section:Toggle{
+	Name = "Illusionist Notifier",
+	Flag = "Toggle 4",
+	--Default = true,
+	Callback  = function(bool)
+		if bool == true then
+			can_GetNotifiedIllu = true
+
+			for i,v in pairs(game.Players:GetPlayers()) do
+				if table.find(All_illus, v) then
+					Notify("illusionist Detected",v.Name.." is a illusionist.",20,"illusionist")
+				end
+				if table.find(Spectating, v) then
+					Notify("illusionist Specating",v.Name.." is a illusionist.",20,"illusionist")
+				end 
+			end
+		else
+			can_GetNotifiedIllu = false
+		end
+	end
+}
+
+
+local toggle = section:Toggle{
+	Name = "Spectate",
+	Flag = "Toggle 5",
+	--Default = true,
+	Callback  = function(bool)
+		if bool == true then
+			Notify("NOTIFICATION","Works just like illusionist",20,"NOTIFICATION")
+			can_spectate = Player.Chatted:Connect(function(msg)
+				if can_spectate ~= false then
+					local plr = get_player(msg)
+					if plr.Character then
+						game.workspace.Camera.CameraType = "Custom"
+						game.workspace.Camera.CameraSubject = plr.Character.Humanoid
+					end
+				end
+			end)
+
+		else
+			if can_spectate ~= false then
+				can_spectate:Disconnect()
+				can_spectate = false
+				game.workspace.Camera.CameraType = "Custom"
+				game.workspace.Camera.CameraSubject = PlrChar
+			end
+		end
+	end
+}
+
+
+local toggle = section:Toggle{
     Name = "Fullbright",
     Flag = "Toggle 6",
     --Default = true,
@@ -331,20 +736,112 @@ local toggle = section_1:Toggle{
 }
 
 
-local toggle = section_1:Toggle{
-    Name = "No Fog",
-    Flag = "Toggle 7",
-    --Default = true,
-   Callback  = function(bool)
-    if bool == true then
-        no_Fog = true
-        else
-        no_Fog = false
-        game.Lighting.FogEnd = 1125
-        game.Lighting.FogStart = 0
-       end
-  end
+local seperator = section:Separator("Removals")
+
+
+local toggle = section:Toggle{
+	Name = "No Fall Damage",
+	Flag = "Toggle 7",
+	--Default = true,
+	Callback  = function(bool)
+		if bool == true then
+			fall_Damage = true
+		else
+			fall_Damage = false
+		end
+	end
 }
+
+
+
+local toggle = section:Toggle{
+	Name = "Anti-Fire",
+	Flag = "Toggle 8",
+	--Default = true,
+	Callback  = function(bool)
+		if bool == true then
+			anti_fire = true
+		else
+			anti_fire = false
+			anti_fireCD = false
+		end
+	end
+}
+
+
+
+local toggle = section:Toggle{
+	Name = "No Fog",
+	Flag = "Toggle 9",
+	--Default = true,
+	Callback  = function(bool)
+		if bool == true then
+			no_Fog = true
+		else
+			no_Fog = false
+			game.Lighting.FogEnd = 100000
+			game.Lighting.FogStart = 50
+		end
+	end
+}
+
+
+
+local seperator = section:Separator("Chat Logger")
+--separator:Set("Separator Set")
+
+
+local toggle = section:Toggle{
+	Name = "Chat Logger",
+	Flag = "Toggle 10",
+	--Default = true,
+	Callback  = function(bool)
+		if bool == true then
+			chat_Logger = true
+			ChatLoggerScreenUI.Enabled = true
+		else
+			chat_Logger = false
+			ChatLoggerScreenUI.Enabled = false
+		end
+	end
+}
+
+local toggle = section:Toggle{
+	Name = "Chat Logger Auto Scroll",
+	Flag = "Toggle 11",
+	--Default = true,
+	Callback  = function(bool)
+		if bool == true then
+			chatlogger_AutoScroll = true
+		else
+			chatlogger_AutoScroll = false
+		end
+	end
+}
+
+section:Button{
+	Name = "Clear Chats",
+	Callback  = function()
+		for i,v in pairs(ScrollingFrameHolder:GetChildren()) do
+			if v:IsA("TextLabel") then
+				v:Destroy()
+			end
+		end
+	end
+}
+
+section:Button{
+	Name = "Respawn",
+	Callback  = function()
+		if PlrChar then
+			PlrChar.Humanoid.Health = 0
+		end
+	end
+}
+
+
+
+
 
 
 
