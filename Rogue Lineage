@@ -1,0 +1,620 @@
+-- Variables 
+local Player = game.Players.LocalPlayer
+local PlrChar = nil
+local Mouse = game.Players.LocalPlayer:GetMouse()
+
+pcall(function()
+PlrChar = Player.Character
+end)
+Player.CharacterAdded:Connect(function()
+    PlrChar = Player.Character 
+end)
+
+
+-- illu variables
+local All_illus = {}
+local Spectating = {}
+local NonSpectator = {}
+
+-- tables
+local KillBricks = {}
+
+
+-- Toggles
+local can_GetNotifiedIllu = false
+local anti_fire = false
+local anti_fireCD = false
+local can_spectate = false
+local full_Bright = false
+local no_Fog = false
+local fall_Damage = false
+ 
+-- Services
+local UIS = game:GetService("UserInputService")
+local StarterGui = game:GetService("StarterGui")
+local RunService = game:GetService("RunService")
+
+-- functions
+
+local function Notify(Title1, Text1, Duration1, For)
+    print(Text1, can_GetNotifiedIllu)
+    if For == "illusionist" then
+      if can_GetNotifiedIllu == true then
+          StarterGui:SetCore("SendNotification", {
+	      Title = Title1;
+	      Text = Text1;
+	      Duration = Duration1;
+	      Button1 = "REMOVE PROMPT"
+	     })
+        end
+    elseif For == "NOTIFICATION" then
+         StarterGui:SetCore("SendNotification", {
+	      Title = Title1;
+	      Text = Text1;
+	      Duration = Duration1;
+	      Button1 = "REMOVE PROMPT"
+	     })
+    end   
+end
+
+local function PlayerLeft(PlrLeft)
+    if table.find(All_illus, PlrLeft) then
+		for i,v in pairs(All_illus) do
+			if v == PlrLeft then
+				table.remove(All_illus, i)
+				Notify("illusionist Has Left",#All_illus.." Left",20,"illusionist")
+			end
+		end
+	end
+	if table.find(NonSpectator, PlrLeft) then
+		for i,v in pairs(NonSpectator) do
+			if v == PlrLeft then
+				table.remove(NonSpectator, i)
+			end
+		end
+	end
+	if table.find(Spectating, PlrLeft) then
+		for i,v in pairs(Spectating) do
+			if v == PlrLeft then
+				table.remove(Spectating, i)
+			 end
+	   	 end
+	  end
+end
+
+local function get_player(player_name)
+    local lower_player_name = string.lower(player_name)
+    for _, player in pairs(game.Players:GetPlayers()) do
+        if player:GetAttribute("FirstName"):sub(1,#player_name):lower() == lower_player_name then
+            return player
+        end
+    end
+end
+
+local hook = hookfunction or detour_function
+local old 
+old = hook(Instance.new("RemoteEvent").FireServer, function(self,...)
+    local args = {...}
+    
+    if PlrChar ~= nil and PlrChar:FindFirstChild("CharacterHandler") and PlrChar.CharacterHandler:FindFirstChild("Remotes") and self.Parent == PlrChar.CharacterHandler.Remotes then
+        if #args == 2 and typeof(args[2]) == "table" and fall_Damage == true then
+            print("returned nil")
+            return nil
+        end
+    end
+    return old(self,...)
+end)
+
+spawn(function()
+ while wait() do 
+     -- full bright 
+     if full_Bright == true then
+         game.Lighting.Brightness = 1
+         game.Lighting.Ambient = Color3.fromRGB(255, 255, 255) 
+     end
+     -- no fog
+     if no_Fog == true then
+        game.Lighting.FogEnd = 99999
+        game.Lighting.FogStart = 99999
+     end
+     -- anti fire   
+     if PlrChar then 
+     if anti_fire == true and PlrChar:FindFirstChild("Burning") then 
+            -- For i,v loop on all remotes
+            for i,v in pairs(Player.Character.CharacterHandler.Remotes:GetChildren()) do
+                if (tostring(v):len() == 40 or tostring(v) == "Dodge") then
+                     v:FireServer({math.random(1, 4), 0});
+                  end
+              end
+          end
+      end
+    -- illu 
+    for i,v in pairs(game.Players:GetPlayers()) do
+		if v:FindFirstChild("Backpack") and game.workspace.Live:FindFirstChild(v.Name) then
+		   
+		   if v.Backpack:FindFirstChild("Observe") or v.Character:FindFirstChild("Observe") then
+		        if not table.find(All_illus, v) then
+				table.insert(All_illus, v) 
+				Notify("illusionist Detected",v.Name.." is a illusionist.",20,"illusionist")
+			    end
+		   end
+	    
+			if v.Backpack:FindFirstChild("Observe") then
+			if not table.find(NonSpectator, v) then
+				table.insert(NonSpectator, v)
+			end
+			if table.find(Spectating, v) then
+				table.remove(Spectating, i)
+                        
+                Notify("illusionist Has Stopped Specating",v.Name.." is a illusionist.",20,"illusionist")
+				end  
+			end
+		
+			elseif table.find(All_illus, v) and v.Backpack:FindFirstChild("Observe") == nil then
+			if table.find(NonSpectator, v) then
+				table.remove(NonSpectator, v)
+			end
+			if not table.find(Spectating, v) then
+			table.insert(Spectating, v)
+
+            Notify("illusionist Specating",v.Name.." is a illusionist.",20,"illusionist")
+		       end 
+	       end
+        end
+    end
+end)
+game.Players.PlayerRemoving:Connect(function(PlrLeft)
+	PlayerLeft(PlrLeft)
+end)
+
+
+-- library.Extension = "txt" (config file extension)
+-- library.Folder = "config folder name"
+
+local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/vozoid/ui-libraries/main/drawing/void/source.lua"))()
+
+local main = library:Load{
+    Name = "Sparrow",
+    SizeX = 750,
+    SizeY = 600,
+    Theme = "Midnight",
+    Extension = "json", -- config file extension
+    Folder = "Sparrow" -- config folder name
+}
+
+local tab = main:Tab("Rogue Lineage")
+
+local section = tab:Section{
+    Name = "Main",
+    Side = "Left"
+}
+
+--label:Set("Label Set")
+
+local toggle = section:Toggle{
+    Name = "Illusionist Notifier",
+    Flag = "Toggle 1",
+    --Default = true,
+   Callback  = function(bool)
+    if bool == true then
+        can_GetNotifiedIllu = true
+        
+   for i,v in pairs(game.Players:GetPlayers()) do
+           if table.find(All_illus, v) then
+				Notify("illusionist Detected",v.Name.." is a illusionist.",20,"illusionist")
+			end
+		   if table.find(Spectating, v) then
+            Notify("illusionist Specating",v.Name.." is a illusionist.",20,"illusionist")
+		    end 
+        end
+        else
+        can_GetNotifiedIllu = false
+       end
+  end
+}
+
+local toggle = section:Toggle{
+    Name = "No Fall Damage",
+    Flag = "Toggle 2",
+    --Default = true,
+   Callback  = function(bool)
+    if bool == true then
+        fall_Damage = true
+        else
+        fall_Damage = false
+       end
+  end
+}
+
+local toggle = section:Toggle{
+    Name = "Spectate",
+    Flag = "Toggle 3",
+    --Default = true,
+   Callback  = function(bool)
+    if bool == true then
+       Notify("NOTIFICATION","Works just like illusionist",20,"NOTIFICATION")
+        can_spectate = Player.Chatted:Connect(function(msg)
+        if can_spectate ~= false then
+          local plr = get_player(msg)
+        if plr.Character then
+          	game.workspace.Camera.CameraType = "Custom"
+        	game.workspace.Camera.CameraSubject = plr.Character.Humanoid
+        end
+    end
+end)
+        
+        else
+         if can_spectate ~= false then
+            can_spectate:Disconnect()
+            can_spectate = false
+            game.workspace.Camera.CameraType = "Custom"
+        	game.workspace.Camera.CameraSubject = PlrChar
+         end
+      end
+  end
+}
+
+
+section:Button{
+    Name = "Respawn",
+    Callback  = function()
+     if PlrChar then
+         PlrChar.Humanoid.Health = 0
+       end
+    end
+}
+
+
+local seperator = section:Separator("Separator")
+--separator:Set("Separator Set")
+
+
+local section_1 = tab:Section{
+    Name = "Secondary",
+    Side = "Right"
+}
+
+
+local toggle = section_1:Toggle{
+    Name = "Remove Kill Bricks",
+    Flag = "Toggle 4",
+    --Default = true,
+   Callback  = function(bool)
+    if bool == true then
+        for i,v in pairs(game.Workspace:GetDescendants()) do
+          if v.Name == "Lava" or v.Name == "KillBrick" or v.Name == "PitKillBrick" or v.Name == "PoisonField" then
+            if v:FindFirstChild("TouchInterest") then
+                if not table.find(KillBricks, v) then
+                   table.insert(KillBricks, v)
+                end
+                v.Parent = nil
+                end
+            end  
+        end
+        else
+        for i,v in pairs(KillBricks) do
+             v.Parent = game.Workspace
+         end 
+      end
+  end
+}
+
+
+local toggle = section_1:Toggle{
+    Name = "Anti-Fire",
+    Flag = "Toggle 5",
+    --Default = true,
+   Callback  = function(bool)
+    if bool == true then
+        anti_fire = true
+        else
+        anti_fire = false
+        anti_fireCD = false
+       end
+  end
+}
+
+
+local toggle = section_1:Toggle{
+    Name = "Fullbright",
+    Flag = "Toggle 6",
+    --Default = true,
+   Callback = function(bool)
+    if bool == true then
+        full_Bright = true
+        else
+        full_Bright = false
+        game.Lighting.Brightness = 0.12
+        game.Lighting.Ambient = Color3.fromRGB(20, 20, 20)
+       end
+  end
+}
+
+
+local toggle = section_1:Toggle{
+    Name = "No Fog",
+    Flag = "Toggle 7",
+    --Default = true,
+   Callback  = function(bool)
+    if bool == true then
+        no_Fog = true
+        else
+        no_Fog = false
+        game.Lighting.FogEnd = 1125
+        game.Lighting.FogStart = 0
+       end
+  end
+}
+
+
+
+
+
+--library:SaveConfig("config", true) -- universal config
+--library:SaveConfig("config") -- game specific config
+--library:DeleteConfig("config", true) -- universal config
+--library:DeleteConfig("config") -- game specific config
+--library:GetConfigs(true) -- return universal and game specific configs (table)
+--library:GetConfigs() -- return game specific configs (table)
+--library:LoadConfig("config", true) -- load universal config
+--library:LoadConfig("config") -- load game specific config
+
+local configs = main:Tab("Configuration")
+
+local themes = configs:Section{Name = "Theme", Side = "Left"}
+
+local themepickers = {}
+
+local themelist = themes:Dropdown{
+    Name = "Theme",
+    Default = library.currenttheme,
+    Content = library:GetThemes(),
+    Flag = "Theme Dropdown",
+    Callback = function(option)
+        if option then
+            library:SetTheme(option)
+
+            for option, picker in next, themepickers do
+                picker:Set(library.theme[option])
+            end
+        end
+    end
+}
+
+library:ConfigIgnore("Theme Dropdown")
+
+local namebox = themes:Box{
+    Name = "Custom Theme Name",
+    Placeholder = "Custom Theme",
+    Flag = "Custom Theme"
+}
+
+library:ConfigIgnore("Custom Theme")
+
+themes:Button{
+    Name = "Save Custom Theme",
+    Callback = function()
+        if library:SaveCustomTheme(library.flags["Custom Theme"]) then
+            themelist:Refresh(library:GetThemes())
+            themelist:Set(library.flags["Custom Theme"])
+            namebox:Set("")
+        end
+    end
+}
+
+local customtheme = configs:Section{Name = "Custom Theme", Side = "Right"}
+
+themepickers["Accent"] = customtheme:ColorPicker{
+    Name = "Accent",
+    Default = library.theme["Accent"],
+    Flag = "Accent",
+    Callback = function(color)
+        library:ChangeThemeOption("Accent", color)
+    end
+}
+
+library:ConfigIgnore("Accent")
+
+themepickers["Window Background"] = customtheme:ColorPicker{
+    Name = "Window Background",
+    Default = library.theme["Window Background"],
+    Flag = "Window Background",
+    Callback = function(color)
+        library:ChangeThemeOption("Window Background", color)
+    end
+}
+
+library:ConfigIgnore("Window Background")
+
+themepickers["Window Border"] = customtheme:ColorPicker{
+    Name = "Window Border",
+    Default = library.theme["Window Border"],
+    Flag = "Window Border",
+    Callback = function(color)
+        library:ChangeThemeOption("Window Border", color)
+    end
+}
+
+library:ConfigIgnore("Window Border")
+
+themepickers["Tab Background"] = customtheme:ColorPicker{
+    Name = "Tab Background",
+    Default = library.theme["Tab Background"],
+    Flag = "Tab Background",
+    Callback = function(color)
+        library:ChangeThemeOption("Tab Background", color)
+    end
+}
+
+library:ConfigIgnore("Tab Background")
+
+themepickers["Tab Border"] = customtheme:ColorPicker{
+    Name = "Tab Border",
+    Default = library.theme["Tab Border"],
+    Flag = "Tab Border",
+    Callback = function(color)
+        library:ChangeThemeOption("Tab Border", color)
+    end
+}
+
+library:ConfigIgnore("Tab Border")
+
+themepickers["Tab Toggle Background"] = customtheme:ColorPicker{
+    Name = "Tab Toggle Background",
+    Default = library.theme["Tab Toggle Background"],
+    Flag = "Tab Toggle Background",
+    Callback = function(color)
+        library:ChangeThemeOption("Tab Toggle Background", color)
+    end
+}
+
+library:ConfigIgnore("Tab Toggle Background")
+
+themepickers["Section Background"] = customtheme:ColorPicker{
+    Name = "Section Background",
+    Default = library.theme["Section Background"],
+    Flag = "Section Background",
+    Callback = function(color)
+        library:ChangeThemeOption("Section Background", color)
+    end
+}
+
+library:ConfigIgnore("Section Background")
+
+themepickers["Section Border"] = customtheme:ColorPicker{
+    Name = "Section Border",
+    Default = library.theme["Section Border"],
+    Flag = "Section Border",
+    Callback = function(color)
+        library:ChangeThemeOption("Section Border", color)
+    end
+}
+
+library:ConfigIgnore("Section Border")
+
+themepickers["Text"] = customtheme:ColorPicker{
+    Name = "Text",
+    Default = library.theme["Text"],
+    Flag = "Text",
+    Callback = function(color)
+        library:ChangeThemeOption("Text", color)
+    end
+}
+
+library:ConfigIgnore("Text")
+
+themepickers["Disabled Text"] = customtheme:ColorPicker{
+    Name = "Disabled Text",
+    Default = library.theme["Disabled Text"],
+    Flag = "Disabled Text",
+    Callback = function(color)
+        library:ChangeThemeOption("Disabled Text", color)
+    end
+}
+
+library:ConfigIgnore("Disabled Text")
+
+themepickers["Object Background"] = customtheme:ColorPicker{
+    Name = "Object Background",
+    Default = library.theme["Object Background"],
+    Flag = "Object Background",
+    Callback = function(color)
+        library:ChangeThemeOption("Object Background", color)
+    end
+}
+
+library:ConfigIgnore("Object Background")
+
+themepickers["Object Border"] = customtheme:ColorPicker{
+    Name = "Object Border",
+    Default = library.theme["Object Border"],
+    Flag = "Object Border",
+    Callback = function(color)
+        library:ChangeThemeOption("Object Border", color)
+    end
+}
+
+library:ConfigIgnore("Object Border")
+
+themepickers["Dropdown Option Background"] = customtheme:ColorPicker{
+    Name = "Dropdown Option Background",
+    Default = library.theme["Dropdown Option Background"],
+    Flag = "Dropdown Option Background",
+    Callback = function(color)
+        library:ChangeThemeOption("Dropdown Option Background", color)
+    end
+}
+
+library:ConfigIgnore("Dropdown Option Background")
+
+local configsection = configs:Section{Name = "Configs", Side = "Left"}
+
+local configlist = configsection:Dropdown{
+    Name = "Configs",
+    Content = library:GetConfigs(), -- GetConfigs(true) if you want universal configs
+    Flag = "Config Dropdown"
+}
+
+library:ConfigIgnore("Config Dropdown")
+
+local loadconfig = configsection:Button{
+    Name = "Load Config",
+    Callback = function()
+        library:LoadConfig(library.flags["Config Dropdown"]) -- LoadConfig(library.flags["Config Dropdown"], true)  if you want universal configs
+    end
+}
+
+local delconfig = configsection:Button{
+    Name = "Delete Config",
+    Callback = function()
+        library:DeleteConfig(library.flags["Config Dropdown"]) -- DeleteConfig(library.flags["Config Dropdown"], true)  if you want universal configs
+        configlist:Refresh(library:GetConfigs())
+    end
+}
+
+
+local configbox = configsection:Box{
+    Name = "Config Name",
+    Placeholder = "Config Name",
+    Flag = "Config Name"
+}
+
+library:ConfigIgnore("Config Name")
+
+local save = configsection:Button{
+    Name = "Save Config",
+    Callback = function()
+        library:SaveConfig(library.flags["Config Dropdown"] or library.flags["Config Name"]) -- SaveConfig(library.flags["Config Name"], true) if you want universal configs
+        configlist:Refresh(library:GetConfigs())
+    end
+}
+
+local keybindsection = configs:Section{Name = "UI Keybind", Side = "Left"}
+
+keybindsection:Keybind{
+    Name = "UI Toggle",
+    Flag = "UI Toggle",
+    Default = Enum.KeyCode.LeftAlt,
+    Blacklist = {Enum.UserInputType.MouseButton1, Enum.UserInputType.MouseButton2, Enum.UserInputType.MouseButton3},
+    Callback = function(_, fromsetting)
+        if not fromsetting then
+            library:Close()
+        end
+    end
+}
+
+keybindsection:Keybind{
+    Name = "Unload UI",
+    Flag = "Unload UI",
+    Default = Enum.KeyCode.RightAlt,
+    Blacklist = {Enum.UserInputType.MouseButton1, Enum.UserInputType.MouseButton2, Enum.UserInputType.MouseButton3},
+    Callback = function(_, fromsetting)
+        if not fromsetting then
+            library:Unload()
+        end
+    end
+}
+
+
+--library:Close()
+--library:Unload()
