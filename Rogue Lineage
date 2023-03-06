@@ -293,7 +293,7 @@ local function Ore_ESP(Ore)
 		if not Ore then return end
 		local World_Pos, Onscreen = workspace.CurrentCamera:WorldToViewportPoint(Ore.Position)
 
-		if Onscreen and ore_ESP then
+		if Onscreen and ore_ESP and Ore.OreLife ~= 0 then
 			Name_Distance.Text = "|"..Ore.Name.."| |"..math.floor((Ore.Position - game.workspace.CurrentCamera.CFrame.Position).Magnitude + .5).."|"  
 			Health.Text = "|"..math.floor(Ore.OreLife.Value + .5).."/"..math.floor(Ore.MaxLife.Value + .5).."| |"..math.floor(Ore.OreLife.Value / Ore.MaxLife.Value * 100 + .5)
 
