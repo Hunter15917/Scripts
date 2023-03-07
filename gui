@@ -2689,10 +2689,11 @@ function library.createkeybind(default, parent, blacklist, flag, callback, offse
         end
     end)
 
-    utility.connect(services.InputService.InputBegan, function(input)
+    utility.connect(services.InputService.InputBegan, function(input, typing)
         if not binding and (input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == key) or input.UserInputType == key then
-            print("yomamamaaa")
+            if not typing then
             callback(key)
+            end
         end
     end)
 
