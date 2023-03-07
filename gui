@@ -2691,7 +2691,7 @@ function library.createkeybind(default, parent, blacklist, flag, callback, offse
 
     utility.connect(services.InputService.InputBegan, function(input)
         if not binding and (input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == key) or input.UserInputType == key then
-            print(key)
+            print("yomamamaaa")
             callback(key)
         end
     end)
