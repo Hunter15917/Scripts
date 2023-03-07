@@ -774,7 +774,7 @@ local toggle_2 = section_Left:Toggle{
 					repeat wait() until PlrChar:FindFirstChild("Boosts")
 
 					if PlrChar.Boosts:FindFirstChild("ClimbBoost") then
-						oldBoosts["ClimbBoost"] = PlrChar.Boosts.SpeedBoost.Value
+						oldBoosts["ClimbBoost"] = PlrChar.Boosts.ClimbBoost.Value
 					end
 					if PlrChar.Boosts:FindFirstChild("ClimbBoost") == nil then
 						local NewBoost = Instance.new("NumberValue")
