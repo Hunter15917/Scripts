@@ -4,16 +4,27 @@ local PlrChar = nil
 local Mouse = game.Players.LocalPlayer:GetMouse()
 
 pcall(function()
-PlrChar = Player.Character
+	PlrChar = Player.Character
 end)
 Player.CharacterAdded:Connect(function()
-    PlrChar = Player.Character 
+	PlrChar = Player.Character 
 end)
 
 -- illu variables
 local All_illus = {}
 local Spectating = {}
 local NonSpectator = {}
+
+
+
+-- walkspeed and climb speed
+
+local SpeedBoost = 0
+local ClimbBoost = 0
+
+local oldBoosts = {}
+local newBoosts = {}
+
 
 
 -- Toggles
@@ -28,43 +39,47 @@ local chatlogger_AutoScroll = false
 local player_ESP = false
 local ore_ESP = false
 local trinket_ESP = false
- 
+local infinite_Mana = false
+local speed_Boost = false
+local climb_Boost = false
+
+
 local Meshes = {
-    ["rbxassetid://16657069"] = "Money Bag",
-    ["rbxassetid://60791940"] = "Scroll",
-    ["rbxassetid://2877143560"] = "Jewel",
-    ["rbxassetid://2637545558"] = "Ring",
-    ["rbxassetid://439102658"] = "Phoenix Feather",
-    ["rbxassetid://13116112"] = "Goblet",
-    ["rbxassetid://5196577540"] = "Amulet",
-    ["rbxassetid://5204003946"] = "Goblet",
-    ["rbxassetid://5204453430"] = "Scroll",
-    ["rbxassetid://5196782997"] = "Old Ring",
-    ["rbxassetid://%2016657069%20"] = "Money Bag",
-    ["rbxassetid://%2060791940%20"] = "Scroll",
-    ["rbxassetid://%202877143560%20"] = "Jewel",
-    ["rbxassetid://%202637545558%20"] = "Ring",
-    ["rbxassetid://%20439102658%20"] = "Phoenix Feather",
-    ["rbxassetid://%2013116112%20"] = "Goblet",
-    ["rbxassetid://%205196577540%20"] = "Amulet",
-    ["rbxassetid://%205204003946%20"] = "Goblet",
-    ["rbxassetid://%205204453430%20"] = "Scroll",
-    ["rbxassetid://%205196782997%20"] = "Old Ring",
-    ["rbxassetid://5196776695"] = "Ring",
-    ["rbxassetid://%205196776695%20"] = "Ring",
+	["rbxassetid://16657069"] = "Money Bag",
+	["rbxassetid://60791940"] = "Scroll",
+	["rbxassetid://2877143560"] = "Jewel",
+	["rbxassetid://2637545558"] = "Ring",
+	["rbxassetid://439102658"] = "Phoenix Feather",
+	["rbxassetid://13116112"] = "Goblet",
+	["rbxassetid://5196577540"] = "Amulet",
+	["rbxassetid://5204003946"] = "Goblet",
+	["rbxassetid://5204453430"] = "Scroll",
+	["rbxassetid://5196782997"] = "Old Ring",
+	["rbxassetid://%2016657069%20"] = "Money Bag",
+	["rbxassetid://%2060791940%20"] = "Scroll",
+	["rbxassetid://%202877143560%20"] = "Jewel",
+	["rbxassetid://%202637545558%20"] = "Ring",
+	["rbxassetid://%20439102658%20"] = "Phoenix Feather",
+	["rbxassetid://%2013116112%20"] = "Goblet",
+	["rbxassetid://%205196577540%20"] = "Amulet",
+	["rbxassetid://%205204003946%20"] = "Goblet",
+	["rbxassetid://%205204453430%20"] = "Scroll",
+	["rbxassetid://%205196782997%20"] = "Old Ring",
+	["rbxassetid://5196776695"] = "Ring",
+	["rbxassetid://%205196776695%20"] = "Ring",
 } 
- 
- 
- 
+
+
+
 -- Services
 local UIS = game:GetService("UserInputService")
 local StarterGui = game:GetService("StarterGui")
 local RunService = game:GetService("RunService")
 
 
--- if Player.PlayerGui:FindFirstChild("LeaderboardGui") == nil then
---    StarterGui.LeaderboardGui.Parent = Player.PlayerGui
--- end
+if Player.PlayerGui:FindFirstChild("LeaderboardGui") == nil then
+	StarterGui.LeaderboardGui.Parent = Player.PlayerGui
+end
 
 
 -- chat logger gui  
@@ -150,8 +165,8 @@ ScrollingFrameUIList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(fun
 end)
 ScrollingFrameUIList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
 	if chatlogger_AutoScroll == true then
-	ScrollingFrameHolder.CanvasPosition = Vector2.new(0, ScrollingFrameUIList.AbsoluteContentSize.Y + 75)
-    end
+		ScrollingFrameHolder.CanvasPosition = Vector2.new(0, ScrollingFrameUIList.AbsoluteContentSize.Y + 75)
+	end
 end)
 
 
@@ -283,6 +298,16 @@ local function Ore_ESP(Ore)
 
 	local RS 
 	RS = game:GetService("RunService").RenderStepped:Connect(function()
+		local Blacklisted = false
+
+		if Ore:FindFirstChild("Blacklist") then
+			if Ore.Blacklist:FindFirstChild(Player.Name) ~= nil then
+				Blacklisted = true
+			end
+		else
+			Blacklisted = false
+		end
+
 		if not Ore then 
 			Name_Distance:Remove()
 			Health:Remove()
@@ -292,8 +317,8 @@ local function Ore_ESP(Ore)
 
 		if not Ore then return end
 		local World_Pos, Onscreen = workspace.CurrentCamera:WorldToViewportPoint(Ore.Position)
-       
-		if Onscreen and ore_ESP and Ore.OreLife.Value ~= 0 and Ore.Blacklist:FindFirstChild(Player.Name) == nil then
+
+		if Onscreen and ore_ESP and Ore.OreLife.Value ~= 0 and Blacklisted == false then
 			Name_Distance.Text = "|"..Ore.Name.."| |"..math.floor((Ore.Position - game.workspace.CurrentCamera.CFrame.Position).Magnitude + .5).."|"  
 			Health.Text = "|"..math.floor(Ore.OreLife.Value + .5).."/"..math.floor(Ore.MaxLife.Value + .5).."| |"..math.floor(Ore.OreLife.Value / Ore.MaxLife.Value * 100 + .5)
 
@@ -310,7 +335,7 @@ end
 
 
 local function Player_ESP(PlrESP)
-    if PlrESP == Player then return end
+	if PlrESP == Player then return end
 	local Name_Distance = Drawing.new("Text")
 	Name_Distance.Size = 16
 	Name_Distance.Center = true
@@ -448,23 +473,23 @@ end
 
 
 local function Notify(Title1, Text1, Duration1, For)
-    if For == "illusionist" then
-      if can_GetNotifiedIllu == true then
-          StarterGui:SetCore("SendNotification", {
-	      Title = Title1;
-	      Text = Text1;
-	      Duration = Duration1;
-	      Button1 = "REMOVE PROMPT"
-	     })
-        end
-    elseif For == "NOTIFICATION" then
-         StarterGui:SetCore("SendNotification", {
-	      Title = Title1;
-	      Text = Text1;
-	      Duration = Duration1;
-	      Button1 = "REMOVE PROMPT"
-	     })
-    end   
+	if For == "illusionist" then
+		if can_GetNotifiedIllu == true then
+			StarterGui:SetCore("SendNotification", {
+				Title = Title1;
+				Text = Text1;
+				Duration = Duration1;
+				Button1 = "REMOVE PROMPT"
+			})
+		end
+	elseif For == "NOTIFICATION" then
+		StarterGui:SetCore("SendNotification", {
+			Title = Title1;
+			Text = Text1;
+			Duration = Duration1;
+			Button1 = "REMOVE PROMPT"
+		})
+	end   
 end
 
 local function PlayerLeft(PlrLeft)
@@ -493,184 +518,464 @@ local function PlayerLeft(PlrLeft)
 end
 
 local function PlayerAdded(PlrAdded)
-    UpdateChatlogger(PlrAdded)
-    Player_ESP(PlrAdded)
+	UpdateChatlogger(PlrAdded)
+	Player_ESP(PlrAdded)
 end
 
 local function get_player(player_name)
-    local lower_player_name = string.lower(player_name)
-    for _, player in pairs(game.Players:GetPlayers()) do
-        if player:GetAttribute("FirstName"):sub(1,#player_name):lower() == lower_player_name then
-            return player
-        end
-    end
+	local lower_player_name = string.lower(player_name)
+	for _, player in pairs(game.Players:GetPlayers()) do
+		if player:GetAttribute("FirstName"):sub(1,#player_name):lower() == lower_player_name then
+			return player
+		end
+	end
 end
 
+for i,v in pairs(workspace:GetChildren()) do 
+	if v:IsA("MeshPart") or v:IsA("UnionOperation") or v:IsA("Part") then 
+		for i2,v2 in pairs(v:GetDescendants()) do 
+			if v2:IsA("ClickDetector") then 
+				CreateTrinketESP(v2.Parent)
+			end
+		end
+	end
+end
 
- local hook = hookfunction or detour_function
- local old 
- old = hook(Instance.new("RemoteEvent").FireServer, function(self,...)
-    local args = {...}
-    
-    if PlrChar ~= nil and PlrChar:FindFirstChild("CharacterHandler") and PlrChar.CharacterHandler:FindFirstChild("Remotes") and self.Parent == PlrChar.CharacterHandler.Remotes then
-        if #args == 2 and typeof(args[2]) == "table" and fall_Damage == true then
-            return nil
-        end
-    end
-    return old(self,...)
+workspace.ChildAdded:Connect(function(v)
+	if v:IsA("MeshPart") or v:IsA("UnionOperation") or v:IsA("Part") then 
+		for i2,v2 in pairs(v:GetDescendants()) do 
+			if v2:IsA("ClickDetector") then 
+				CreateTrinketESP(v2.Parent)
+			end
+		end
+	end
+end)
+
+
+
+local hook = hookfunction or detour_function
+local old 
+old = hook(Instance.new("RemoteEvent").FireServer, function(self,...)
+	local args = {...}
+
+	if PlrChar ~= nil and PlrChar:FindFirstChild("CharacterHandler") and PlrChar.CharacterHandler:FindFirstChild("Remotes") and self.Parent == PlrChar.CharacterHandler.Remotes then
+		if #args == 2 and typeof(args[2]) == "table" and fall_Damage == true then
+			return nil
+		end
+	end
+	return old(self,...)
 end)
 
 spawn(function()
- while wait() do 
-     -- full bright 
-     if full_Bright == true then
-         game.Lighting.Brightness = 1
-         game.Lighting.Ambient = Color3.fromRGB(255, 255, 255) 
-     end
-     -- no fog
-     if no_Fog == true then
-        game.Lighting.FogEnd = 99999
-        game.Lighting.FogStart = 99999
-     end
-     -- anti fire   
-     if PlrChar then 
-     if anti_fire == true and PlrChar:FindFirstChild("Burning") then 
-           --  For i,v loop on all remotes
-            for i,v in pairs(Player.Character.CharacterHandler.Remotes:GetChildren()) do
-                if (tostring(v):len() == 40 or tostring(v) == "Dodge") then
-                     v:FireServer({math.random(1, 4), 0});
-                  end
-              end
-          end
-      end
-    -- illu 
-    for i,v in pairs(game.Players:GetPlayers()) do
-		if v:FindFirstChild("Backpack") and game.workspace.Live:FindFirstChild(v.Name) then
-		   
-		   if v.Backpack:FindFirstChild("Observe") or v.Character:FindFirstChild("Observe") then
-		        if not table.find(All_illus, v) then
-				table.insert(All_illus, v) 
-				Notify("illusionist Detected",v.Name.." is a illusionist.",20,"illusionist")
-			    end
-		   end
-	    
-			if v.Backpack:FindFirstChild("Observe") then
-			if not table.find(NonSpectator, v) then
-				table.insert(NonSpectator, v)
-			end
-			if table.find(Spectating, v) then
-				table.remove(Spectating, i)
-                        
-                Notify("illusionist Has Stopped Specating",v.Name.." is a illusionist.",20,"illusionist")
-				end  
-			end
-		
-			elseif table.find(All_illus, v) and v.Backpack:FindFirstChild("Observe") == nil then
-			if table.find(NonSpectator, v) then
-				table.remove(NonSpectator, v)
-			end
-			if not table.find(Spectating, v) then
-			table.insert(Spectating, v)
+	while wait() do 
 
-            Notify("illusionist Specating",v.Name.." is a illusionist.",20,"illusionist")
-		       end 
-	       end
-        end
-    end
+
+		-- infinite mana 
+		if infinite_Mana == true then
+			if PlrChar then
+				if PlrChar:FindFirstChild("Mana") then
+					PlrChar.Mana.Value = 100
+				end
+			end
+		end
+		-- full bright 
+		if full_Bright == true then
+			game.Lighting.Brightness = 1
+			game.Lighting.Ambient = Color3.fromRGB(255, 255, 255) 
+		end
+		-- no fog
+		if no_Fog == true then
+			game.Lighting.FogEnd = 99999
+			game.Lighting.FogStart = 99999
+		end
+		-- anti fire   
+		if PlrChar then 
+			if anti_fire == true and PlrChar:FindFirstChild("Burning") then 
+				--  For i,v loop on all remotes
+				for i,v in pairs(Player.Character.CharacterHandler.Remotes:GetChildren()) do
+					if (tostring(v):len() == 40 or tostring(v) == "Dodge") then
+						v:FireServer({math.random(1, 4), 0});
+					end
+				end
+			end
+		end
+		-- illu 
+		for i,v in pairs(game.Players:GetPlayers()) do
+			if v:FindFirstChild("Backpack") and game.workspace.Live:FindFirstChild(v.Name) then
+
+				if v.Backpack:FindFirstChild("Observe") or v.Character:FindFirstChild("Observe") then
+					if not table.find(All_illus, v) then
+						table.insert(All_illus, v) 
+						Notify("illusionist Detected",v.Name.." is a illusionist.",20,"illusionist")
+					end
+				end
+
+				if v.Backpack:FindFirstChild("Observe") then
+					if not table.find(NonSpectator, v) then
+						table.insert(NonSpectator, v)
+					end
+					if table.find(Spectating, v) then
+						table.remove(Spectating, i)
+
+						Notify("illusionist Has Stopped Specating",v.Name.." is a illusionist.",20,"illusionist")
+					end  
+				end
+
+			elseif table.find(All_illus, v) and v.Backpack:FindFirstChild("Observe") == nil then
+				if table.find(NonSpectator, v) then
+					table.remove(NonSpectator, v)
+				end
+				if not table.find(Spectating, v) then
+					table.insert(Spectating, v)
+
+					Notify("illusionist Specating",v.Name.." is a illusionist.",20,"illusionist")
+				end 
+			end
+		end
+	end
 end)
 
 game.Players.PlayerRemoving:Connect(function(PlrLeft)
 	PlayerLeft(PlrLeft)
 end)
 game.Players.PlayerAdded:Connect(function(PlrAdded)
-    PlayerAdded(PlrAdded)
+	PlayerAdded(PlrAdded)
 end)
 for i,v in pairs(game.Players:GetPlayers()) do
-   UpdateChatlogger(v)
-   Player_ESP(v)
+	UpdateChatlogger(v)
+	Player_ESP(v)
 end
 for i,v in pairs(game.workspace.Ores:GetChildren()) do
-    Ore_ESP(v)
+	Ore_ESP(v)
 end
 game.workspace.Ores.ChildAdded:Connect(function(ItemAdded)
-    Ore_ESP(ItemAdded)
+	Ore_ESP(ItemAdded)
 end)
 
 -- library.Extension = "txt" (config file extension)
 -- library.Folder = "config folder name"
 
-local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/vozoid/ui-libraries/main/drawing/void/source.lua"))()
+local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Hunter15917/Scripts/main/gui"))()
 
 local main = library:Load{
-    Name = "Sparrow",
-    SizeX = 500,
-    SizeY = 450,
-    Theme = "Midnight",
-    Extension = "json", -- config file extension
-    Folder = "Sparrow" -- config folder name
+	Name = "Sparrow",
+	SizeX = 500,
+	SizeY = 450,
+	Theme = "Midnight",
+	Extension = "json", -- config file extension
+	Folder = "Sparrow" -- config folder name
 }
 
 local tab = main:Tab("Rogue Lineage")
 
-local section = tab:Section{
-    Name = "Main",
-    Side = "Left"
+
+
+local section_Left = tab:Section{
+	Name = "Main",
+	Side = "Left"
+}
+
+
+local seperator = section_Left:Separator("Speed")
+
+
+local toggle_1 = section_Left:Toggle{
+	Name = "Speed Boost",
+	Flag = "Toggle 1",
+	--Default = true,
+	Callback  = function(bool)
+		if bool == true then
+			speed_Boost = true
+			spawn(function()
+				repeat wait() until PlrChar
+				if PlrChar and speed_Boost == true then
+					repeat wait() until PlrChar:FindFirstChild("Boosts")
+
+					if PlrChar.Boosts:FindFirstChild("SpeedBoost") then
+						oldBoosts["SpeedBoost"] = PlrChar.Boosts.SpeedBoost.Value
+					end
+					if PlrChar.Boosts:FindFirstChild("SpeedBoost") == nil then
+						local NewBoost = Instance.new("NumberValue")
+						NewBoost.Parent = PlrChar.Boosts
+						NewBoost.Name = "SpeedBoost"
+						NewBoost.Value = SpeedBoost
+
+						newBoosts["SpeedBoost"] = NewBoost.Value
+					end
+					while wait() do
+						if PlrChar and PlrChar:FindFirstChild("Boosts") and PlrChar.Boosts:FindFirstChild("SpeedBoost") then
+							if speed_Boost == true then
+								PlrChar.Boosts["SpeedBoost"].Value = SpeedBoost
+							else
+								break
+							end
+						end
+					end	
+				end
+			end)
+		else
+			speed_Boost = false
+			spawn(function()
+				repeat wait() until PlrChar
+				if PlrChar and speed_Boost == false then 
+					if newBoosts["SpeedBoost"] ~= nil then
+						PlrChar.Boosts["SpeedBoost"]:Destroy()
+						table.remove(newBoosts, "SpeedBoost")
+					end
+					if oldBoosts["SpeedBoost"] ~= nil then
+						PlrChar.Boosts["SpeedBoost"].Value = oldBoosts["SpeedBoost"] 
+					end
+				end
+			end)
+		end
+	end
+}
+
+
+toggle_1:Keybind{
+	--Default = Enum.KeyCode.A,
+	Blacklist = {Enum.UserInputType.MouseButton1},
+	Flag = "Toggle 1 Keybind 1",
+	Mode = "Toggle", -- mode to nil if u dont want it to toggle the toggle
+	Callback = function(key, fromsetting)
+
+	end
+}
+
+
+toggle_1:Slider{
+	Text = "[value]/200",
+	--Default = 5,
+	Min = 0,
+	Max = 200,
+	Float = 1,
+	Flag = "Slider 1",
+	Callback = function(value)
+		SpeedBoost = value
+	end
+}
+
+
+
+
+
+
+
+local toggle_2 = section_Left:Toggle{
+	Name = "Climb Speed",
+	Flag = "Toggle 2",
+	--Default = true,
+	Callback  = function(bool)
+		if bool == true then
+			climb_Boost = true
+			spawn(function()
+				repeat wait() until PlrChar
+				if PlrChar and climb_Boost == true then
+					repeat wait() until PlrChar:FindFirstChild("Boosts")
+
+					if PlrChar.Boosts:FindFirstChild("ClimbBoost") then
+						oldBoosts["ClimbBoost"] = PlrChar.Boosts.SpeedBoost.Value
+					end
+					if PlrChar.Boosts:FindFirstChild("ClimbBoost") == nil then
+						local NewBoost = Instance.new("NumberValue")
+						NewBoost.Parent = PlrChar.Boosts
+						NewBoost.Name = "ClimbBoost"
+						NewBoost.Value = ClimbBoost
+
+						newBoosts["ClimbBoost"] = NewBoost.Value
+					end
+					while wait() do
+						if PlrChar and PlrChar:FindFirstChild("Boosts") and PlrChar.Boosts:FindFirstChild("ClimbBoost") then
+							if climb_Boost == true then
+								PlrChar.Boosts["ClimbBoost"].Value = ClimbBoost
+							else
+								break
+							end
+						end
+					end	
+				end
+			end)
+		else
+			climb_Boost = false
+			spawn(function()
+				repeat wait() until PlrChar
+				if PlrChar and climb_Boost == false then 
+					if newBoosts["ClimbBoost"] ~= nil then
+						PlrChar.Boosts["ClimbBoost"]:Destroy()
+						table.remove(newBoosts, "ClimbBoost")
+					end
+					if oldBoosts["ClimbBoost"] ~= nil then
+						PlrChar.Boosts["ClimbBoost"].Value = oldBoosts["ClimbBoost"] 
+					end
+				end
+			end)
+		end
+	end
+}
+
+
+toggle_2:Keybind{
+	--Default = Enum.KeyCode.A,
+	Blacklist = {Enum.UserInputType.MouseButton1},
+	Flag = "Toggle 2 Keybind 2",
+	Mode = "Toggle", -- mode to nil if u dont want it to toggle the toggle
+	Callback = function(key, fromsetting)
+
+	end
+}
+
+
+toggle_1:Slider{
+	Text = "[value]/200",
+	--Default = 5,
+	Min = 0,
+	Max = 10,
+	Float = 1,
+	Flag = "Slider 2",
+	Callback = function(value)
+		ClimbBoost = value
+	end
+}
+
+
+
+
+local seperator = section_Left:Separator("Useful Toggle")
+
+
+local toggle_3 = section_Left:Toggle{
+	Name = "Infinite Mana",
+	Flag = "Toggle 3",
+	--Default = true,
+	Callback  = function(bool)
+		if bool == true then
+			infinite_Mana = true
+			Notify("NOTIFICATION","Only works for Mana Run and Climb \n P.S Dont Climb For To Long",20,"NOTIFICATION")
+		else
+			infinite_Mana = false
+			if PlrChar then
+				repeat task.wait() PlrChar.Mana.Value = 0 until PlrChar.Mana.Value == 0
+			end
+		end
+	end
+}
+
+
+toggle_3:Keybind{
+	--Default = Enum.KeyCode.A,
+	Blacklist = {Enum.UserInputType.MouseButton1},
+	Flag = "Toggle 3 Keybind 3",
+	Mode = "Toggle", -- mode to nil if u dont want it to toggle the toggle
+	Callback = function(key, fromsetting)
+
+	end
+}
+
+
+
+--label:Set("Label Set")
+
+
+
+local section_Right = tab:Section{
+	Name = "Main",
+	Side = "Right"
 }
 
 --label:Set("Label Set")
 
 
-local seperator = section:Separator("ESP")
+local seperator = section_Right:Separator("ESP")
 
 
-local toggle = section:Toggle{
-    Name = "Player ESP",
-    Flag = "Toggle 1",
-    --Default = true,
-   Callback  = function(bool)
-    if bool == true then
-       player_ESP = true
-    else
-       player_ESP = false
-       end
-  end
-}
 
 
-local toggle = section:Toggle{
-    Name = "Ore ESP",
-    Flag = "Toggle 2",
-    --Default = true,
-   Callback  = function(bool)
-    if bool == true then
-       ore_ESP = true
-    else
-       ore_ESP = false
-       end
-  end
-}
-
-
-local toggle = section:Toggle{
-    Name = "Trinket ESP",
-    Flag = "Toggle 3",
-    --Default = true,
-   Callback  = function(bool)
-    if bool == true then
-       trinket_ESP = true
-    else
-       trinket_ESP = false
-       end
-  end
-}
-
-
-local seperator = section:Separator("Useful Toggles")
-
-
-local toggle = section:Toggle{
-	Name = "Illusionist Notifier",
+local toggle_4 = section_Right:Toggle{
+	Name = "Player ESP",
 	Flag = "Toggle 4",
+	--Default = true,
+	Callback  = function(bool)
+		if bool == true then
+			player_ESP = true
+		else
+			player_ESP = false
+		end
+	end
+}
+
+toggle_4:Keybind{
+	--Default = Enum.KeyCode.A,
+	Blacklist = {Enum.UserInputType.MouseButton1},
+	Flag = "Toggle 4 Keybind 4",
+	Mode = "Toggle", -- mode to nil if u dont want it to toggle the toggle
+	Callback = function(key, fromsetting)
+
+	end
+}
+
+
+
+
+
+local toggle_5 = section_Right:Toggle{
+	Name = "Ore ESP",
+	Flag = "Toggle 5",
+	--Default = true,
+	Callback  = function(bool)
+		if bool == true then
+			ore_ESP = true
+		else
+			ore_ESP = false
+		end
+	end
+}
+
+
+toggle_5:Keybind{
+	--Default = Enum.KeyCode.A,
+	Blacklist = {Enum.UserInputType.MouseButton1},
+	Flag = "Toggle 5 Keybind 5",
+	Mode = "Toggle", -- mode to nil if u dont want it to toggle the toggle
+	Callback = function(key, fromsetting)
+
+	end
+}
+
+
+
+
+local toggle_6 = section_Right:Toggle{
+	Name = "Trinket ESP",
+	Flag = "Toggle 6",
+	--Default = true,
+	Callback  = function(bool)
+		if bool == true then
+			trinket_ESP = true
+		else
+			trinket_ESP = false
+		end
+	end
+}
+
+
+toggle_6:Keybind{
+	--Default = Enum.KeyCode.A,
+	Blacklist = {Enum.UserInputType.MouseButton1},
+	Flag = "Toggle 6 Keybind 6",
+	Mode = "Toggle", -- mode to nil if u dont want it to toggle the toggle
+	Callback = function(key, fromsetting)
+
+	end
+}
+
+
+
+local seperator = section_Right:Separator("Useful Toggles")
+
+
+local toggle_7 = section_Right:Toggle{
+	Name = "Illusionist Notifier",
+	Flag = "Toggle 7",
 	--Default = true,
 	Callback  = function(bool)
 		if bool == true then
@@ -691,9 +996,22 @@ local toggle = section:Toggle{
 }
 
 
-local toggle = section:Toggle{
+toggle_7:Keybind{
+	--Default = Enum.KeyCode.A,
+	Blacklist = {Enum.UserInputType.MouseButton1},
+	Flag = "Toggle 7 Keybind 7",
+	Mode = "Toggle", -- mode to nil if u dont want it to toggle the toggle
+	Callback = function(key, fromsetting)
+
+	end
+}
+
+
+
+
+local toggle_8 = section_Right:Toggle{
 	Name = "Spectate",
-	Flag = "Toggle 5",
+	Flag = "Toggle 8",
 	--Default = true,
 	Callback  = function(bool)
 		if bool == true then
@@ -720,28 +1038,54 @@ local toggle = section:Toggle{
 }
 
 
-local toggle = section:Toggle{
-    Name = "Fullbright",
-    Flag = "Toggle 6",
-    --Default = true,
-   Callback = function(bool)
-    if bool == true then
-        full_Bright = true
-        else
-        full_Bright = false
-        game.Lighting.Brightness = 0.12
-        game.Lighting.Ambient = Color3.fromRGB(20, 20, 20)
-       end
-  end
+toggle_8:Keybind{
+	--Default = Enum.KeyCode.A,
+	Blacklist = {Enum.UserInputType.MouseButton1},
+	Flag = "Toggle 8 Keybind 8",
+	Mode = "Toggle", -- mode to nil if u dont want it to toggle the toggle
+	Callback = function(key, fromsetting)
+
+	end
 }
 
 
-local seperator = section:Separator("Removals")
 
 
-local toggle = section:Toggle{
+local toggle_9 = section_Right:Toggle{
+	Name = "Fullbright",
+	Flag = "Toggle 9",
+	--Default = true,
+	Callback = function(bool)
+		if bool == true then
+			full_Bright = true
+		else
+			full_Bright = false
+			game.Lighting.Brightness = 0.12
+			game.Lighting.Ambient = Color3.fromRGB(20, 20, 20)
+		end
+	end
+}
+
+
+toggle_9:Keybind{
+	--Default = Enum.KeyCode.A,
+	Blacklist = {Enum.UserInputType.MouseButton1},
+	Flag = "Toggle 9 Keybind 9",
+	Mode = "Toggle", -- mode to nil if u dont want it to toggle the toggle
+	Callback = function(key, fromsetting)
+
+	end
+}
+
+
+local seperator = section_Right:Separator("Removals")
+
+
+
+
+local toggle_10 = section_Right:Toggle{
 	Name = "No Fall Damage",
-	Flag = "Toggle 7",
+	Flag = "Toggle 10",
 	--Default = true,
 	Callback  = function(bool)
 		if bool == true then
@@ -753,10 +1097,22 @@ local toggle = section:Toggle{
 }
 
 
+toggle_10:Keybind{
+	--Default = Enum.KeyCode.A,
+	Blacklist = {Enum.UserInputType.MouseButton1},
+	Flag = "Toggle 10 Keybind 10",
+	Mode = "Toggle", -- mode to nil if u dont want it to toggle the toggle
+	Callback = function(key, fromsetting)
 
-local toggle = section:Toggle{
+	end
+}
+
+
+
+
+local toggle_11 = section_Right:Toggle{
 	Name = "Anti-Fire",
-	Flag = "Toggle 8",
+	Flag = "Toggle 11",
 	--Default = true,
 	Callback  = function(bool)
 		if bool == true then
@@ -769,10 +1125,22 @@ local toggle = section:Toggle{
 }
 
 
+toggle_11:Keybind{
+	--Default = Enum.KeyCode.A,
+	Blacklist = {Enum.UserInputType.MouseButton1},
+	Flag = "Toggle 11 Keybind 11",
+	Mode = "Toggle", -- mode to nil if u dont want it to toggle the toggle
+	Callback = function(key, fromsetting)
 
-local toggle = section:Toggle{
+	end
+}
+
+
+
+
+local toggle_12 = section_Right:Toggle{
 	Name = "No Fog",
-	Flag = "Toggle 9",
+	Flag = "Toggle 12",
 	--Default = true,
 	Callback  = function(bool)
 		if bool == true then
@@ -786,14 +1154,26 @@ local toggle = section:Toggle{
 }
 
 
+toggle_12:Keybind{
+	--Default = Enum.KeyCode.A,
+	Blacklist = {Enum.UserInputType.MouseButton1},
+	Flag = "Toggle 12 Keybind 12",
+	Mode = "Toggle", -- mode to nil if u dont want it to toggle the toggle
+	Callback = function(key, fromsetting)
 
-local seperator = section:Separator("Chat Logger")
+	end
+}
+
+
+local seperator = section_Right:Separator("Chat Logger")
 --separator:Set("Separator Set")
 
 
-local toggle = section:Toggle{
+
+
+local toggle_13 = section_Right:Toggle{
 	Name = "Chat Logger",
-	Flag = "Toggle 10",
+	Flag = "Toggle 13",
 	--Default = true,
 	Callback  = function(bool)
 		if bool == true then
@@ -806,9 +1186,23 @@ local toggle = section:Toggle{
 	end
 }
 
-local toggle = section:Toggle{
+
+toggle_13:Keybind{
+	--Default = Enum.KeyCode.A,
+	Blacklist = {Enum.UserInputType.MouseButton1},
+	Flag = "Toggle 13 Keybind 13",
+	Mode = "Toggle", -- mode to nil if u dont want it to toggle the toggle
+	Callback = function(key, fromsetting)
+
+	end
+}
+
+
+
+
+local toggle_14 = section_Right:Toggle{
 	Name = "Chat Logger Auto Scroll",
-	Flag = "Toggle 11",
+	Flag = "Toggle 14",
 	--Default = true,
 	Callback  = function(bool)
 		if bool == true then
@@ -819,7 +1213,8 @@ local toggle = section:Toggle{
 	end
 }
 
-section:Button{
+
+section_Right:Button{
 	Name = "Clear Chats",
 	Callback  = function()
 		for i,v in pairs(ScrollingFrameHolder:GetChildren()) do
@@ -830,7 +1225,7 @@ section:Button{
 	end
 }
 
-section:Button{
+section_Right:Button{
 	Name = "Respawn",
 	Callback  = function()
 		if PlrChar then
@@ -863,183 +1258,183 @@ local themes = configs:Section{Name = "Theme", Side = "Left"}
 local themepickers = {}
 
 local themelist = themes:Dropdown{
-    Name = "Theme",
-    Default = library.currenttheme,
-    Content = library:GetThemes(),
-    Flag = "Theme Dropdown",
-    Callback = function(option)
-        if option then
-            library:SetTheme(option)
+	Name = "Theme",
+	Default = library.currenttheme,
+	Content = library:GetThemes(),
+	Flag = "Theme Dropdown",
+	Callback = function(option)
+		if option then
+			library:SetTheme(option)
 
-            for option, picker in next, themepickers do
-                picker:Set(library.theme[option])
-            end
-        end
-    end
+			for option, picker in next, themepickers do
+				picker:Set(library.theme[option])
+			end
+		end
+	end
 }
 
 library:ConfigIgnore("Theme Dropdown")
 
 local namebox = themes:Box{
-    Name = "Custom Theme Name",
-    Placeholder = "Custom Theme",
-    Flag = "Custom Theme"
+	Name = "Custom Theme Name",
+	Placeholder = "Custom Theme",
+	Flag = "Custom Theme"
 }
 
 library:ConfigIgnore("Custom Theme")
 
 themes:Button{
-    Name = "Save Custom Theme",
-    Callback = function()
-        if library:SaveCustomTheme(library.flags["Custom Theme"]) then
-            themelist:Refresh(library:GetThemes())
-            themelist:Set(library.flags["Custom Theme"])
-            namebox:Set("")
-        end
-    end
+	Name = "Save Custom Theme",
+	Callback = function()
+		if library:SaveCustomTheme(library.flags["Custom Theme"]) then
+			themelist:Refresh(library:GetThemes())
+			themelist:Set(library.flags["Custom Theme"])
+			namebox:Set("")
+		end
+	end
 }
 
 local customtheme = configs:Section{Name = "Custom Theme", Side = "Right"}
 
 themepickers["Accent"] = customtheme:ColorPicker{
-    Name = "Accent",
-    Default = library.theme["Accent"],
-    Flag = "Accent",
-    Callback = function(color)
-        library:ChangeThemeOption("Accent", color)
-    end
+	Name = "Accent",
+	Default = library.theme["Accent"],
+	Flag = "Accent",
+	Callback = function(color)
+		library:ChangeThemeOption("Accent", color)
+	end
 }
 
 library:ConfigIgnore("Accent")
 
 themepickers["Window Background"] = customtheme:ColorPicker{
-    Name = "Window Background",
-    Default = library.theme["Window Background"],
-    Flag = "Window Background",
-    Callback = function(color)
-        library:ChangeThemeOption("Window Background", color)
-    end
+	Name = "Window Background",
+	Default = library.theme["Window Background"],
+	Flag = "Window Background",
+	Callback = function(color)
+		library:ChangeThemeOption("Window Background", color)
+	end
 }
 
 library:ConfigIgnore("Window Background")
 
 themepickers["Window Border"] = customtheme:ColorPicker{
-    Name = "Window Border",
-    Default = library.theme["Window Border"],
-    Flag = "Window Border",
-    Callback = function(color)
-        library:ChangeThemeOption("Window Border", color)
-    end
+	Name = "Window Border",
+	Default = library.theme["Window Border"],
+	Flag = "Window Border",
+	Callback = function(color)
+		library:ChangeThemeOption("Window Border", color)
+	end
 }
 
 library:ConfigIgnore("Window Border")
 
 themepickers["Tab Background"] = customtheme:ColorPicker{
-    Name = "Tab Background",
-    Default = library.theme["Tab Background"],
-    Flag = "Tab Background",
-    Callback = function(color)
-        library:ChangeThemeOption("Tab Background", color)
-    end
+	Name = "Tab Background",
+	Default = library.theme["Tab Background"],
+	Flag = "Tab Background",
+	Callback = function(color)
+		library:ChangeThemeOption("Tab Background", color)
+	end
 }
 
 library:ConfigIgnore("Tab Background")
 
 themepickers["Tab Border"] = customtheme:ColorPicker{
-    Name = "Tab Border",
-    Default = library.theme["Tab Border"],
-    Flag = "Tab Border",
-    Callback = function(color)
-        library:ChangeThemeOption("Tab Border", color)
-    end
+	Name = "Tab Border",
+	Default = library.theme["Tab Border"],
+	Flag = "Tab Border",
+	Callback = function(color)
+		library:ChangeThemeOption("Tab Border", color)
+	end
 }
 
 library:ConfigIgnore("Tab Border")
 
 themepickers["Tab Toggle Background"] = customtheme:ColorPicker{
-    Name = "Tab Toggle Background",
-    Default = library.theme["Tab Toggle Background"],
-    Flag = "Tab Toggle Background",
-    Callback = function(color)
-        library:ChangeThemeOption("Tab Toggle Background", color)
-    end
+	Name = "Tab Toggle Background",
+	Default = library.theme["Tab Toggle Background"],
+	Flag = "Tab Toggle Background",
+	Callback = function(color)
+		library:ChangeThemeOption("Tab Toggle Background", color)
+	end
 }
 
 library:ConfigIgnore("Tab Toggle Background")
 
 themepickers["Section Background"] = customtheme:ColorPicker{
-    Name = "Section Background",
-    Default = library.theme["Section Background"],
-    Flag = "Section Background",
-    Callback = function(color)
-        library:ChangeThemeOption("Section Background", color)
-    end
+	Name = "Section Background",
+	Default = library.theme["Section Background"],
+	Flag = "Section Background",
+	Callback = function(color)
+		library:ChangeThemeOption("Section Background", color)
+	end
 }
 
 library:ConfigIgnore("Section Background")
 
 themepickers["Section Border"] = customtheme:ColorPicker{
-    Name = "Section Border",
-    Default = library.theme["Section Border"],
-    Flag = "Section Border",
-    Callback = function(color)
-        library:ChangeThemeOption("Section Border", color)
-    end
+	Name = "Section Border",
+	Default = library.theme["Section Border"],
+	Flag = "Section Border",
+	Callback = function(color)
+		library:ChangeThemeOption("Section Border", color)
+	end
 }
 
 library:ConfigIgnore("Section Border")
 
 themepickers["Text"] = customtheme:ColorPicker{
-    Name = "Text",
-    Default = library.theme["Text"],
-    Flag = "Text",
-    Callback = function(color)
-        library:ChangeThemeOption("Text", color)
-    end
+	Name = "Text",
+	Default = library.theme["Text"],
+	Flag = "Text",
+	Callback = function(color)
+		library:ChangeThemeOption("Text", color)
+	end
 }
 
 library:ConfigIgnore("Text")
 
 themepickers["Disabled Text"] = customtheme:ColorPicker{
-    Name = "Disabled Text",
-    Default = library.theme["Disabled Text"],
-    Flag = "Disabled Text",
-    Callback = function(color)
-        library:ChangeThemeOption("Disabled Text", color)
-    end
+	Name = "Disabled Text",
+	Default = library.theme["Disabled Text"],
+	Flag = "Disabled Text",
+	Callback = function(color)
+		library:ChangeThemeOption("Disabled Text", color)
+	end
 }
 
 library:ConfigIgnore("Disabled Text")
 
 themepickers["Object Background"] = customtheme:ColorPicker{
-    Name = "Object Background",
-    Default = library.theme["Object Background"],
-    Flag = "Object Background",
-    Callback = function(color)
-        library:ChangeThemeOption("Object Background", color)
-    end
+	Name = "Object Background",
+	Default = library.theme["Object Background"],
+	Flag = "Object Background",
+	Callback = function(color)
+		library:ChangeThemeOption("Object Background", color)
+	end
 }
 
 library:ConfigIgnore("Object Background")
 
 themepickers["Object Border"] = customtheme:ColorPicker{
-    Name = "Object Border",
-    Default = library.theme["Object Border"],
-    Flag = "Object Border",
-    Callback = function(color)
-        library:ChangeThemeOption("Object Border", color)
-    end
+	Name = "Object Border",
+	Default = library.theme["Object Border"],
+	Flag = "Object Border",
+	Callback = function(color)
+		library:ChangeThemeOption("Object Border", color)
+	end
 }
 
 library:ConfigIgnore("Object Border")
 
 themepickers["Dropdown Option Background"] = customtheme:ColorPicker{
-    Name = "Dropdown Option Background",
-    Default = library.theme["Dropdown Option Background"],
-    Flag = "Dropdown Option Background",
-    Callback = function(color)
-        library:ChangeThemeOption("Dropdown Option Background", color)
-    end
+	Name = "Dropdown Option Background",
+	Default = library.theme["Dropdown Option Background"],
+	Flag = "Dropdown Option Background",
+	Callback = function(color)
+		library:ChangeThemeOption("Dropdown Option Background", color)
+	end
 }
 
 library:ConfigIgnore("Dropdown Option Background")
@@ -1047,69 +1442,69 @@ library:ConfigIgnore("Dropdown Option Background")
 local configsection = configs:Section{Name = "Configs", Side = "Left"}
 
 local configlist = configsection:Dropdown{
-    Name = "Configs",
-    Content = library:GetConfigs(), -- GetConfigs(true) if you want universal configs
-    Flag = "Config Dropdown"
+	Name = "Configs",
+	Content = library:GetConfigs(), -- GetConfigs(true) if you want universal configs
+	Flag = "Config Dropdown"
 }
 
 library:ConfigIgnore("Config Dropdown")
 
 local loadconfig = configsection:Button{
-    Name = "Load Config",
-    Callback = function()
-        library:LoadConfig(library.flags["Config Dropdown"]) -- LoadConfig(library.flags["Config Dropdown"], true)  if you want universal configs
-    end
+	Name = "Load Config",
+	Callback = function()
+		library:LoadConfig(library.flags["Config Dropdown"]) -- LoadConfig(library.flags["Config Dropdown"], true)  if you want universal configs
+	end
 }
 
 local delconfig = configsection:Button{
-    Name = "Delete Config",
-    Callback = function()
-        library:DeleteConfig(library.flags["Config Dropdown"]) -- DeleteConfig(library.flags["Config Dropdown"], true)  if you want universal configs
-        configlist:Refresh(library:GetConfigs())
-    end
+	Name = "Delete Config",
+	Callback = function()
+		library:DeleteConfig(library.flags["Config Dropdown"]) -- DeleteConfig(library.flags["Config Dropdown"], true)  if you want universal configs
+		configlist:Refresh(library:GetConfigs())
+	end
 }
 
 
 local configbox = configsection:Box{
-    Name = "Config Name",
-    Placeholder = "Config Name",
-    Flag = "Config Name"
+	Name = "Config Name",
+	Placeholder = "Config Name",
+	Flag = "Config Name"
 }
 
 library:ConfigIgnore("Config Name")
 
 local save = configsection:Button{
-    Name = "Save Config",
-    Callback = function()
-        library:SaveConfig(library.flags["Config Dropdown"] or library.flags["Config Name"]) -- SaveConfig(library.flags["Config Name"], true) if you want universal configs
-        configlist:Refresh(library:GetConfigs())
-    end
+	Name = "Save Config",
+	Callback = function()
+		library:SaveConfig(library.flags["Config Dropdown"] or library.flags["Config Name"]) -- SaveConfig(library.flags["Config Name"], true) if you want universal configs
+		configlist:Refresh(library:GetConfigs())
+	end
 }
 
 local keybindsection = configs:Section{Name = "UI Keybind", Side = "Left"}
 
 keybindsection:Keybind{
-    Name = "UI Toggle",
-    Flag = "UI Toggle",
-    Default = Enum.KeyCode.LeftAlt,
-    Blacklist = {Enum.UserInputType.MouseButton1, Enum.UserInputType.MouseButton2, Enum.UserInputType.MouseButton3},
-    Callback = function(_, fromsetting)
-        if not fromsetting then
-            library:Close()
-        end
-    end
+	Name = "UI Toggle",
+	Flag = "UI Toggle",
+	Default = Enum.KeyCode.LeftAlt,
+	Blacklist = {Enum.UserInputType.MouseButton1, Enum.UserInputType.MouseButton2, Enum.UserInputType.MouseButton3},
+	Callback = function(_, fromsetting)
+		if not fromsetting then
+			library:Close()
+		end
+	end
 }
 
 keybindsection:Keybind{
-    Name = "Unload UI",
-    Flag = "Unload UI",
-    Default = Enum.KeyCode.RightAlt,
-    Blacklist = {Enum.UserInputType.MouseButton1, Enum.UserInputType.MouseButton2, Enum.UserInputType.MouseButton3},
-    Callback = function(_, fromsetting)
-        if not fromsetting then
-            library:Unload()
-        end
-    end
+	Name = "Unload UI",
+	Flag = "Unload UI",
+	Default = Enum.KeyCode.RightAlt,
+	Blacklist = {Enum.UserInputType.MouseButton1, Enum.UserInputType.MouseButton2, Enum.UserInputType.MouseButton3},
+	Callback = function(_, fromsetting)
+		if not fromsetting then
+			library:Unload()
+		end
+	end
 }
 
 
