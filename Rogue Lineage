@@ -826,7 +826,7 @@ toggle_2:Keybind{
 
 
 toggle_2:Slider{
-	Text = "[value]/200",
+	Text = "[value]/10",
 	--Default = 5,
 	Min = 0,
 	Max = 10,
