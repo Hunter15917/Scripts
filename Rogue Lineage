@@ -394,9 +394,9 @@ local function Player_ESP(PlrESP)
 				Health_Percentage.Text = "|"..math.floor(PlrESP.Character.Humanoid.Health + .5).."/"..math.floor(PlrESP.Character.Humanoid.MaxHealth + .5).."| |"..math.floor(PlrESP.Character.Humanoid.Health / PlrESP.Character.Humanoid.MaxHealth * 100 + .5)
 				Holding.Text = "|"..tostring(HoldingItem).."|"
 
-				Holding.Position = Vector2.new(World_Pos.X, World_Pos.Y) - Vector2.new(0,100)
-				Health_Percentage.Position = Vector2.new(World_Pos.X, World_Pos.Y) - Vector2.new(0,115)
-				Name_Distance.Position = Vector2.new(World_Pos.X, World_Pos.Y) - Vector2.new(0,130)
+				Holding.Position = Vector2.new(World_Pos.X, World_Pos.Y) - Vector2.new(0,50)
+				Health_Percentage.Position = Vector2.new(World_Pos.X, World_Pos.Y) - Vector2.new(0,65)
+				Name_Distance.Position = Vector2.new(World_Pos.X, World_Pos.Y) - Vector2.new(0,80)
 
 				Holding.Visible = true
 				Name_Distance.Visible = true
@@ -825,7 +825,7 @@ toggle_2:Keybind{
 }
 
 
-toggle_1:Slider{
+toggle_2:Slider{
 	Text = "[value]/200",
 	--Default = 5,
 	Min = 0,
