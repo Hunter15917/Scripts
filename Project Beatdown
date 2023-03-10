@@ -1,0 +1,906 @@
+-- Variables 
+local Player = game.Players.LocalPlayer
+local PlrChar = nil
+local Mouse = game.Players.LocalPlayer:GetMouse()
+
+pcall(function()
+	PlrChar = Player.Character
+end)
+Player.CharacterAdded:Connect(function()
+	PlrChar = Player.Character 
+end)
+
+
+-- Services
+local UIS = game:GetService("UserInputService")
+local StarterGui = game:GetService("StarterGui")
+local RunService = game:GetService("RunService")
+local vim = game:GetService('VirtualInputManager')
+local groups = game:GetService("GroupService")
+local ts = game:GetService("TweenService")
+
+-- Toggles
+local ally = false
+local auto_PB = false
+local autopb_Warning = false
+local ally_Warning = false
+local infinite_Run = false
+local infinite_Dash = false
+local no_Stun = false
+local anti_Grip = false
+local no_Clip = false
+local moneyfarm_Warning = false
+
+
+-- variables
+local fill_colorR = 255
+local fill_colorG = 0 
+local fill_colorB = 0
+
+local outline_colorR = 255
+local outline_colorG = 255 
+local outline_colorB = 255
+
+local MoneyFarmDown = false
+local AtPizzaMan = false
+local AfterGettingJob = false
+local moneyfarm_Speed = 150
+
+
+-- Functions
+local function Tween(part, endpos, speed)
+	if part and endpos then
+		local Time = (endpos - part.Position).magnitude/speed
+		local Info = TweenInfo.new(Time, Enum.EasingStyle.Linear)
+		local Tween = ts:Create(part,Info,{CFrame = CFrame.new(endpos.X,endpos.Y,endpos.Z)})
+		Tween:Play()
+		wait(Time)
+	end
+end
+local function pressKey(key)
+	vim:SendKeyEvent(true, key, false, game)
+end
+local function releaseKey(key)
+	vim:SendKeyEvent(false, key, false, game)
+end
+local function get_player(player_name)
+	local Is_Number = tonumber(player_name)
+
+	if Is_Number then
+		for i,playercharacter in pairs(game.Workspace.Live:GetDescendants()) do
+			if playercharacter.Name == "GangGroup" then
+				if playercharacter.Parent.Parent:FindFirstChild("Highlight") == nil then
+					if playercharacter.GroupName.Text == groups:GetGroupInfoAsync(player_name).Name and ally == true then
+						local highlight = Instance.new("Highlight")
+						highlight.Parent = playercharacter.Parent.Parent
+						highlight.Name = "Highlight"
+						highlight.FillColor = Color3.fromRGB(fill_colorR, fill_colorG, fill_colorB)
+						highlight.OutlineColor = Color3.fromRGB(outline_colorR, outline_colorG, outline_colorB)
+					end   
+				end
+			end
+		end
+	else
+		local lower_player_name = string.lower(player_name)
+		for _, player in pairs(game.Players:GetPlayers()) do
+			if player.DisplayName:sub(1,#player_name):lower() == lower_player_name then
+				if player.Character:FindFirstChild("Highlight") == nil and ally == true then
+					local highlight = Instance.new("Highlight")
+					highlight.Parent = player.Character
+					highlight.Name = "Highlight"
+					highlight.FillColor = Color3.fromRGB(fill_colorR, fill_colorG, fill_colorB)
+					highlight.OutlineColor = Color3.fromRGB(outline_colorR, outline_colorG, outline_colorB)
+				end
+			end
+		end
+	end
+end
+
+Player.Chatted:Connect(function(msg)
+	if ally == true then
+		local plr = get_player(msg)
+	end
+end)
+game:GetService("RunService").RenderStepped:Connect(function()
+	pcall(function() 
+		for i,enemy in pairs(game.Workspace.Live:GetChildren()) do
+			if enemy ~= game.Players.LocalPlayer.Character and enemy:FindFirstChild("HumanoidRootPart") and (enemy.HumanoidRootPart.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude <= 15 and auto_PB == true and enemy:FindFirstChild("Highlight") == nil then
+				if not enemy:FindFirstChild("CombatStun") then continue end
+				local dirToOtherPlayer = (enemy.HumanoidRootPart.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).unit
+				if game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.LookVector:Dot(dirToOtherPlayer) > 0.4 then
+					pressKey(Enum.KeyCode.F) 
+					task.wait(.2)
+					releaseKey(Enum.KeyCode.F) 
+				end
+			end  
+			task.wait(.3)
+		end
+	end)
+end)
+local mt = getrawmetatable(game)
+make_writeable(mt)
+local namecall = mt.__namecall
+mt.__namecall = newcclosure(function(self, ...)
+	local method = getnamecallmethod()
+	local args = {...}
+
+	if method == "FireServer" and tostring(self) == "RunEvent" and infinite_Run == true then
+		if args[1] == true then return end
+	elseif method == "InvokeServer" and tostring(self) == "DashEvent" and infinite_Dash == true then
+		return
+	end
+	return namecall(self, table.unpack(args))
+end)
+
+local Rm, Index, NIndex, NCall, Caller = getrawmetatable(game), getrawmetatable(game).__index, getrawmetatable(game).__newindex, getrawmetatable(game).__namecall, checkcaller or is_protosmasher_caller
+setreadonly(Rm, false)
+
+Rm.__newindex = newcclosure(function(self, Meme, Value)
+	if Caller() then return NIndex(self, Meme, Value) end 
+	if tostring(self) == "HumanoidRootPart" or tostring(self) == "Torso" then 
+		if Meme == "CFrame" and self:IsDescendantOf(LocalP.Character) then 
+			return true -- Credits to ze_lI for this
+		end
+	end
+	return NIndex(self, Meme, Value)
+end)
+setreadonly(Rm, true)
+
+
+local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Hunter15917/Scripts/main/gui"))()
+
+local main = library:Load{
+	Name = "Sparrow",
+	SizeX = 500,
+	SizeY = 500,
+	Theme = "Midnight",
+	Extension = "json", -- config file extension
+	Folder = "Sparrow" -- config folder name
+}
+
+
+
+-- library.Extension = "txt" (config file extension)
+-- library.Folder = "config folder name"
+
+local tab = main:Tab("Tab")
+
+local section_Left = tab:Section{
+	Name = "Safe",
+	Side = "Left"
+}
+
+--label:Set("Label Set")
+--separator:Set("Separator Set")
+
+
+local seperator = section_Left:Separator("Auto Farm")
+
+
+local function nograv()
+	if PlrChar.HumanoidRootPart:FindFirstChild("NoGravity") == nil then
+		local NoGrav = Instance.new("BodyVelocity")
+		NoGrav.Name = "NoGravity"
+		NoGrav.MaxForce = Vector3.new(100000000, 100000000, 100000000)
+		NoGrav.P = 90000000
+		NoGrav.Velocity = Vector3.new(0, 0, 0)
+		NoGrav.Parent = PlrChar.HumanoidRootPart 
+	end
+	if PlrChar.Torso:FindFirstChild("NoGravity") == nil then
+		local NoGrav = Instance.new("BodyVelocity")
+		NoGrav.Name = "NoGravity"
+		NoGrav.MaxForce = Vector3.new(100000000, 100000000, 100000000)
+		NoGrav.P = 90000000
+		NoGrav.Velocity = Vector3.new(0, 0, 0)
+		NoGrav.Parent = PlrChar.Torso 
+	end 
+end
+
+
+local slider = section_Left:Slider{
+	Text = "[value]/500",
+	Default = 150,
+	Min = 0,
+	Max = 500,
+	Float = 1,
+	Flag = "Slider 1",
+	Callback = function(value)
+		moneyfarm_Speed = value
+	end
+}
+
+local button = section_Left:Button{
+	Name = "Auto Pizza Job",
+	Callback  = function()
+		if no_Clip == false then 
+			StarterGui:SetCore("SendNotification", {
+				Title = "NOTIFICATION";
+				Text = "Turn On NoClip";
+				Duration = 60;
+				Button1 = "REMOVE PROMPT"
+			})
+			return 
+		end 
+		if PlrChar.Humanoid:FindFirstChild("Animator") then
+			StarterGui:SetCore("SendNotification", {
+				Title = "NOTIFICATION";
+				Text = "Turn On God mode \n so you dont die lol";
+				Duration = 60;
+				Button1 = "REMOVE PROMPT"
+			})
+			return  
+		end    
+		spawn(function()
+			while true do
+				if no_Clip == false or PlrChar.Humanoid:FindFirstChild("Animator") then break end
+				if moneyfarm_Warning == false then
+					moneyfarm_Warning = true
+					StarterGui:SetCore("SendNotification", {
+						Title = "NOTIFICATION";
+						Text = "Unfortunately theres no way to remove clothes, sry lol";
+						Duration = 60;
+						Button1 = "REMOVE PROMPT"
+					})
+					StarterGui:SetCore("SendNotification", {
+						Title = "PRO TIP";
+						Text = "Join game and then change clothes \n ingame it'll show diff clothes on leaderboard";
+						Duration = 60;
+						Button1 = "REMOVE PROMPT"
+					})
+				end
+				if PlrChar:FindFirstChild("Head") then
+					for i,v in pairs(PlrChar:GetDescendants()) do
+						if v:IsA("Accessory") then
+							v:Destroy()
+						end
+						wait()
+					end
+					PlrChar["Head"]:Destroy()
+					PlrChar["Left Arm"]:Destroy()
+					PlrChar["Right Arm"]:Destroy()
+					PlrChar["Left Leg"]:Destroy()
+					PlrChar["Right Leg"]:Destroy()
+				end
+				nograv()
+				if MoneyFarmDown == false then
+					Tween(PlrChar.HumanoidRootPart, Vector3.new(PlrChar.HumanoidRootPart.Position.X,-12,PlrChar.HumanoidRootPart.Position.Z), 15)
+					MoneyFarmDown = true
+				end
+				nograv()
+				if not PlrChar:FindFirstChild("Mission") and MoneyFarmDown == true and AtPizzaMan == false then
+					Tween(PlrChar.HumanoidRootPart, game.workspace.Missions.PizzaDelivery.Position - Vector3.new(0,15,10), moneyfarm_Speed)
+					AtPizzaMan = true
+				elseif not PlrChar:FindFirstChild("Mission") and MoneyFarmDown == true and AtPizzaMan == true then  
+					Tween(PlrChar.HumanoidRootPart, game.workspace.Missions.PizzaDelivery.Position - Vector3.new(0,-2,10), 15)
+					fireclickdetector(game.workspace.Missions.PizzaDelivery.ClickDetector)
+					repeat game:GetService("RunService").Stepped:Wait() until PlrChar:FindFirstChild("Mission")
+					MoneyFarmDown = false
+				end
+				nograv()
+				if PlrChar:FindFirstChild("Mission") and MoneyFarmDown == true and AtPizzaMan == true then
+					AtPizzaMan = false
+					nograv()
+					if PlrChar:FindFirstChild("Mission").Location.Value == 1 then
+						nograv()
+						Tween(PlrChar.HumanoidRootPart, Vector3.new(-378.1214599609375, -12, -467.05682373046875), moneyfarm_Speed)
+						Tween(PlrChar.HumanoidRootPart, Vector3.new(-378.1214599609375, 3.4999992847442627, -467.05682373046875), 15)
+						nograv()
+						repeat game:GetService("RunService").Stepped:Wait() until PlrChar:FindFirstChild("Mission") == nil
+						MoneyFarmDown = false
+					elseif PlrChar:FindFirstChild("Mission").Location.Value == 4 then
+						nograv()
+						Tween(PlrChar.HumanoidRootPart, Vector3.new(-92.04825592041016, -12, -602.7265625), moneyfarm_Speed)
+						Tween(PlrChar.HumanoidRootPart, Vector3.new(-92.04825592041016, 3.4999992847442627, -602.7265625), 15)
+						nograv()
+						repeat game:GetService("RunService").Stepped:Wait() until PlrChar:FindFirstChild("Mission") == nil
+						MoneyFarmDown = false
+
+					elseif PlrChar:FindFirstChild("Mission").Location.Value == 3 then
+						nograv()
+						Tween(PlrChar.HumanoidRootPart, Vector3.new(-62.05238723754883, -12, -79.0844497680664), moneyfarm_Speed)
+						Tween(PlrChar.HumanoidRootPart, Vector3.new(-62.05238723754883, 2.9999992847442627, -79.0844497680664), 15)
+						nograv()
+						repeat game:GetService("RunService").Stepped:Wait() until PlrChar:FindFirstChild("Mission") == nil
+						MoneyFarmDown = false  
+
+					elseif PlrChar:FindFirstChild("Mission").Location.Value == 2 then
+						nograv()
+						Tween(PlrChar.HumanoidRootPart, Vector3.new(304.9508361816406, -12, -176.9788818359375), moneyfarm_Speed)
+						Tween(PlrChar.HumanoidRootPart, Vector3.new(304.9508361816406, 3.0499989986419678, -176.9788818359375), 15)
+						nograv()
+						repeat game:GetService("RunService").Stepped:Wait() until PlrChar:FindFirstChild("Mission") == nil
+						MoneyFarmDown = false  
+					end
+				end
+				game:GetService("RunService").Stepped:Wait()
+			end
+		end)
+	end
+}
+
+section_Left:Button{
+	Name = "Auto Dummy",
+	Callback  = function()
+		if no_Clip == false then 
+			StarterGui:SetCore("SendNotification", {
+				Title = "NOTIFICATION";
+				Text = "Turn On NoClip";
+				Duration = 60;
+				Button1 = "REMOVE PROMPT"
+			})
+			return 
+		end 
+		StarterGui:SetCore("SendNotification", {
+			Title = "PRO TIP";
+			Text = "Join game and then change clothes \n ingame it'll show diff clothes on leaderboard";
+			Duration = 60;
+			Button1 = "REMOVE PROMPT"
+		})
+		spawn(function()
+			while RunService.RenderStepped:Wait() do
+				if PlrChar:FindFirstChild("Head") then
+					PlrChar.Head:Destroy() 
+				end
+				if PlrChar.Humanoid:FindFirstChild("Animator") then
+					PlrChar.Humanoid.Animator:Destroy()    
+				end
+				if PlrChar:FindFirstChild("DeleteMe") then
+					PlrChar.DeleteMe:Destroy()  
+				end
+				if PlrChar:FindFirstChild("Knocked") then
+					PlrChar.Knocked:Destroy()
+				end
+				if PlrChar:FindFirstChild("Ragdoll") then
+					PlrChar.Ragdoll:Destroy()
+				end
+				nograv()
+				spawn(function()
+					Tween(PlrChar.HumanoidRootPart, Vector3.new(-53.842010498046875, 3.049999237060547, 83.90282440185547), 250)
+				end)
+				if (PlrChar.HumanoidRootPart.Position - Vector3.new(-53.842010498046875, 3.049999237060547, 83.90282440185547)).Magnitude < 5 then 
+					if PlrChar:FindFirstChild("Combat") == nil then
+						Player.Backpack.Combat.Parent = PlrChar 
+					else
+						PlrChar.Combat:Activate()
+					end    
+				end    
+			end
+		end)	
+	end
+}
+
+
+section_Left:Button{
+	Name = "Auto Punching Bag",
+	Callback  = function()
+		if no_Clip == false then 
+			StarterGui:SetCore("SendNotification", {
+				Title = "NOTIFICATION";
+				Text = "Turn On NoClip";
+				Duration = 60;
+				Button1 = "REMOVE PROMPT"
+			})
+			return 
+		end 
+		StarterGui:SetCore("SendNotification", {
+			Title = "PRO TIP";
+			Text = "Join game and then change clothes \n ingame it'll show diff clothes on leaderboard";
+			Duration = 60;
+			Button1 = "REMOVE PROMPT"
+		})
+		spawn(function()
+			while RunService.RenderStepped:Wait() do
+				for i,v in pairs(Workspace:GetChildren()) do
+				   if v.Name == "PunchMe" then
+				    v.HumanoidRootPart.CanCollide = false
+				    end
+				end
+				if PlrChar:FindFirstChild("Head") then
+					PlrChar.Head:Destroy() 
+				end
+				if PlrChar.Humanoid:FindFirstChild("Animator") then
+					PlrChar.Humanoid.Animator:Destroy()    
+				end
+				if PlrChar:FindFirstChild("DeleteMe") then
+					PlrChar.DeleteMe:Destroy()  
+				end
+				if PlrChar:FindFirstChild("Knocked") then
+					PlrChar.Knocked:Destroy()
+				end
+				if PlrChar:FindFirstChild("Ragdoll") then
+					PlrChar.Ragdoll:Destroy()
+				end
+				nograv()
+				spawn(function()
+					Tween(PlrChar.HumanoidRootPart, Vector3.new(-133, 6.49554, -9.79997), 250)
+				end)
+				if (PlrChar.HumanoidRootPart.Position - Vector3.new(-133, 6.49554, -9.79997)).Magnitude < 5 then 
+					if PlrChar:FindFirstChild("Combat") == nil then
+						Player.Backpack.Combat.Parent = PlrChar 
+					else
+						PlrChar.Combat:Activate()
+					end    
+				end    
+			end
+		end)	
+	end
+}
+
+
+
+local seperator = section_Left:Separator("Auto PB")
+
+
+local toggle = section_Left:Toggle{
+	Name = "Auto PB",
+	Flag = "Toggle 1",
+	--Default = true,
+	Callback  = function(bool)
+		if bool == true then
+			auto_PB = true
+
+
+			if autopb_Warning == false then
+				autopb_Warning = true
+				StarterGui:SetCore("SendNotification", {
+					Title = "How to Whitelist";
+					Text = "Its Harder to Auto PB Slower Styles, sry lol";
+					Duration = 60;
+					Button1 = "REMOVE PROMPT"
+				})
+			end
+		else
+			auto_PB = false
+		end
+	end
+}
+
+toggle:Keybind{
+	--Default = Enum.KeyCode.A,
+	Blacklist = {Enum.UserInputType.MouseButton1},
+	Flag = "Toggle 2 Keybind 1",
+	Mode = "Toggle", -- mode to nil if u dont want it to toggle the toggle
+	Callback = function(key, fromsetting)
+	end
+}
+
+
+local toggle2 = section_Left:Toggle{
+	Name = "Auto PB Whitelist",
+	Flag = "Toggle 2",
+	--Default = true,
+	Callback  = function(bool)
+		if bool == true then
+			ally = true
+
+			if ally_Warning == false then
+				ally_Warning = true
+				StarterGui:SetCore("SendNotification", {
+					Title = "How to Whitelist";
+					Text = "Type a persons name in the chat \n OR \n Type a crew id in the chat";
+					Duration = 60;
+					Button1 = "REMOVE PROMPT"
+				})
+			end
+		else
+			ally = false
+		end
+	end
+}
+
+section_Left:Button{
+	Name = "Clear Whitelist",
+	Callback  = function()
+		for i,v in pairs(game.Workspace.Live:GetDescendants()) do
+			if v.Name == "Highlight" then
+				v:Destroy()
+			end   
+		end
+	end
+}
+
+local seperator = section_Left:Separator("Whitelist Visual")
+
+
+local colorpicker = section_Left:ColorPicker{
+	Name = "Fill Color",
+	Default = Color3.fromRGB(255, 0, 0),
+	Flag = "Color picker 1",
+	Callback = function(color)
+		for i,v in pairs(game.Workspace.Live:GetDescendants()) do
+			if v.Name == "Highlight" then
+				v.FillColor = Color3.fromRGB(color.R * 255, color.G * 255, color.B * 255)
+			end   
+			fill_colorR = color.R * 255
+			fill_colorG = color.G * 255
+			fill_colorB = color.B * 255
+		end
+	end
+}
+
+
+local colorpicker1 = section_Left:ColorPicker{
+	Name = "Outline Color",
+	Default = Color3.fromRGB(255, 255, 255),
+	Flag = "Color picker 1",
+	Callback = function(color)
+		for i,v in pairs(game.Workspace.Live:GetDescendants()) do
+			if v.Name == "Highlight" then
+				v.OutlineColor = Color3.fromRGB(color.R * 255, color.G * 255, color.B * 255)
+			end    
+			outline_colorR = color.R * 255
+			outline_colorG = color.G * 255
+			outline_colorB = color.B * 255
+		end
+	end
+}
+
+local seperator = section_Left:Separator("Infinite Stamina")
+
+local toggle = section_Left:Toggle{
+	Name = "No Stamina Run",
+	Flag = "Toggle 3",
+	--Default = true,
+	Callback  = function(bool)
+		if bool == true then
+			infinite_Run = true
+		else
+			infinite_Run = false
+		end
+	end
+}
+
+local toggle = section_Left:Toggle{
+	Name = "No Stamina Dash",
+	Flag = "Toggle 4",
+	--Default = true,
+	Callback  = function(bool)
+		if bool == true then
+			infinite_Dash = true
+		else
+			infinite_Dash = false
+		end
+	end
+}
+
+
+local section_Right = tab:Section{
+	Name = "Risky | High Report Chance",
+	Side = "Right"
+}
+
+
+local toggle = section_Right:Toggle{
+	Name = "Anti-Stun",
+	Flag = "Toggle 5",
+	--Default = true,
+	Callback  = function(bool)
+		if bool == true then
+			no_Stun = true
+
+			while RunService.Stepped:Wait() do
+				if no_Stun == false then break end  
+				if PlrChar:FindFirstChild("CombatStun") then
+					PlrChar.CombatStun:Destroy()
+				end    
+				if PlrChar:FindFirstChild("Stun") then
+					PlrChar.Stun:Destroy()
+				end   
+			end
+		else
+			no_Stun = false
+		end
+	end
+}
+
+
+local toggle = section_Right:Toggle{
+	Name = "Anti-Grip",
+	Flag = "Toggle 6",
+	--Default = true,
+	Callback  = function(bool)
+		if bool == true then
+			anti_Grip = true
+
+			while RunService.Stepped:Wait() do
+				if anti_Grip == false then break end  
+				if PlrChar:FindFirstChild("Knocked") then
+					PlrChar.Knocked:Destroy()
+				end
+			end
+		else
+			anti_Grip = false
+		end
+	end
+}
+
+
+local toggle = section_Right:Toggle{
+	Name = "No-Clip",
+	Flag = "Toggle 7",
+	--Default = true,
+	Callback  = function(bool)
+		if bool == true then
+			no_Clip = true
+
+			while RunService.Stepped:Wait() do
+				if no_Clip == false then break end  
+				if PlrChar:FindFirstChild("Head") then
+					PlrChar.Head.CanCollide = false
+				end
+				PlrChar.Torso.CanCollide = false
+			end
+		else
+			no_Clip = false
+		end
+	end
+}
+
+
+
+section_Right:Button{
+	Name = "God Mode",
+	Callback  = function()
+		PlrChar.Humanoid.Animator.Parent = nil
+	end
+}
+
+
+
+--library:SaveConfig("config", true) -- universal config
+--library:SaveConfig("config") -- game specific config
+--library:DeleteConfig("config", true) -- universal config
+--library:DeleteConfig("config") -- game specific config
+--library:GetConfigs(true) -- return universal and game specific configs (table)
+--library:GetConfigs() -- return game specific configs (table)
+--library:LoadConfig("config", true) -- load universal config
+--library:LoadConfig("config") -- load game specific config
+
+local configs = main:Tab("Configuration")
+
+local themes = configs:Section{Name = "Theme", Side = "Left"}
+
+local themepickers = {}
+
+local themelist = themes:Dropdown{
+	Name = "Theme",
+	Default = library.currenttheme,
+	Content = library:GetThemes(),
+	Flag = "Theme Dropdown",
+	Callback = function(option)
+		if option then
+			library:SetTheme(option)
+
+			for option, picker in next, themepickers do
+				picker:Set(library.theme[option])
+			end
+		end
+	end
+}
+
+library:ConfigIgnore("Theme Dropdown")
+
+local namebox = themes:Box{
+	Name = "Custom Theme Name",
+	Placeholder = "Custom Theme",
+	Flag = "Custom Theme"
+}
+
+library:ConfigIgnore("Custom Theme")
+
+themes:Button{
+	Name = "Save Custom Theme",
+	Callback = function()
+		if library:SaveCustomTheme(library.flags["Custom Theme"]) then
+			themelist:Refresh(library:GetThemes())
+			themelist:Set(library.flags["Custom Theme"])
+			namebox:Set("")
+		end
+	end
+}
+
+local customtheme = configs:Section{Name = "Custom Theme", Side = "Right"}
+
+themepickers["Accent"] = customtheme:ColorPicker{
+	Name = "Accent",
+	Default = library.theme["Accent"],
+	Flag = "Accent",
+	Callback = function(color)
+		library:ChangeThemeOption("Accent", color)
+	end
+}
+
+library:ConfigIgnore("Accent")
+
+themepickers["Window Background"] = customtheme:ColorPicker{
+	Name = "Window Background",
+	Default = library.theme["Window Background"],
+	Flag = "Window Background",
+	Callback = function(color)
+		library:ChangeThemeOption("Window Background", color)
+	end
+}
+
+library:ConfigIgnore("Window Background")
+
+themepickers["Window Border"] = customtheme:ColorPicker{
+	Name = "Window Border",
+	Default = library.theme["Window Border"],
+	Flag = "Window Border",
+	Callback = function(color)
+		library:ChangeThemeOption("Window Border", color)
+	end
+}
+
+library:ConfigIgnore("Window Border")
+
+themepickers["Tab Background"] = customtheme:ColorPicker{
+	Name = "Tab Background",
+	Default = library.theme["Tab Background"],
+	Flag = "Tab Background",
+	Callback = function(color)
+		library:ChangeThemeOption("Tab Background", color)
+	end
+}
+
+library:ConfigIgnore("Tab Background")
+
+themepickers["Tab Border"] = customtheme:ColorPicker{
+	Name = "Tab Border",
+	Default = library.theme["Tab Border"],
+	Flag = "Tab Border",
+	Callback = function(color)
+		library:ChangeThemeOption("Tab Border", color)
+	end
+}
+
+library:ConfigIgnore("Tab Border")
+
+themepickers["Tab Toggle Background"] = customtheme:ColorPicker{
+	Name = "Tab Toggle Background",
+	Default = library.theme["Tab Toggle Background"],
+	Flag = "Tab Toggle Background",
+	Callback = function(color)
+		library:ChangeThemeOption("Tab Toggle Background", color)
+	end
+}
+
+library:ConfigIgnore("Tab Toggle Background")
+
+themepickers["Section Background"] = customtheme:ColorPicker{
+	Name = "Section Background",
+	Default = library.theme["Section Background"],
+	Flag = "Section Background",
+	Callback = function(color)
+		library:ChangeThemeOption("Section Background", color)
+	end
+}
+
+library:ConfigIgnore("Section Background")
+
+themepickers["Section Border"] = customtheme:ColorPicker{
+	Name = "Section Border",
+	Default = library.theme["Section Border"],
+	Flag = "Section Border",
+	Callback = function(color)
+		library:ChangeThemeOption("Section Border", color)
+	end
+}
+
+library:ConfigIgnore("Section Border")
+
+themepickers["Text"] = customtheme:ColorPicker{
+	Name = "Text",
+	Default = library.theme["Text"],
+	Flag = "Text",
+	Callback = function(color)
+		library:ChangeThemeOption("Text", color)
+	end
+}
+
+library:ConfigIgnore("Text")
+
+themepickers["Disabled Text"] = customtheme:ColorPicker{
+	Name = "Disabled Text",
+	Default = library.theme["Disabled Text"],
+	Flag = "Disabled Text",
+	Callback = function(color)
+		library:ChangeThemeOption("Disabled Text", color)
+	end
+}
+
+library:ConfigIgnore("Disabled Text")
+
+themepickers["Object Background"] = customtheme:ColorPicker{
+	Name = "Object Background",
+	Default = library.theme["Object Background"],
+	Flag = "Object Background",
+	Callback = function(color)
+		library:ChangeThemeOption("Object Background", color)
+	end
+}
+
+library:ConfigIgnore("Object Background")
+
+themepickers["Object Border"] = customtheme:ColorPicker{
+	Name = "Object Border",
+	Default = library.theme["Object Border"],
+	Flag = "Object Border",
+	Callback = function(color)
+		library:ChangeThemeOption("Object Border", color)
+	end
+}
+
+library:ConfigIgnore("Object Border")
+
+themepickers["Dropdown Option Background"] = customtheme:ColorPicker{
+	Name = "Dropdown Option Background",
+	Default = library.theme["Dropdown Option Background"],
+	Flag = "Dropdown Option Background",
+	Callback = function(color)
+		library:ChangeThemeOption("Dropdown Option Background", color)
+	end
+}
+
+library:ConfigIgnore("Dropdown Option Background")
+
+local configsection = configs:Section{Name = "Configs", Side = "Left"}
+
+local configlist = configsection:Dropdown{
+	Name = "Configs",
+	Content = library:GetConfigs(), -- GetConfigs(true) if you want universal configs
+	Flag = "Config Dropdown"
+}
+
+library:ConfigIgnore("Config Dropdown")
+
+local loadconfig = configsection:Button{
+	Name = "Load Config",
+	Callback = function()
+		library:LoadConfig(library.flags["Config Dropdown"]) -- LoadConfig(library.flags["Config Dropdown"], true)  if you want universal configs
+	end
+}
+
+local delconfig = configsection:Button{
+	Name = "Delete Config",
+	Callback = function()
+		library:DeleteConfig(library.flags["Config Dropdown"]) -- DeleteConfig(library.flags["Config Dropdown"], true)  if you want universal configs
+		configlist:Refresh(library:GetConfigs())
+	end
+}
+
+
+local configbox = configsection:Box{
+	Name = "Config Name",
+	Placeholder = "Config Name",
+	Flag = "Config Name"
+}
+
+library:ConfigIgnore("Config Name")
+
+local save = configsection:Button{
+	Name = "Save Config",
+	Callback = function()
+		library:SaveConfig(library.flags["Config Dropdown"] or library.flags["Config Name"]) -- SaveConfig(library.flags["Config Name"], true) if you want universal configs
+		configlist:Refresh(library:GetConfigs())
+	end
+}
+
+local keybindsection = configs:Section{Name = "UI Toggle Keybind", Side = "Left"}
+
+keybindsection:Keybind{
+	Name = "UI Toggle",
+	Flag = "UI Toggle",
+	Default = Enum.KeyCode.RightShift,
+	Blacklist = {Enum.UserInputType.MouseButton1, Enum.UserInputType.MouseButton2, Enum.UserInputType.MouseButton3},
+	Callback = function(_, fromsetting)
+		if not fromsetting then
+			library:Close()
+		end
+	end
+}
+
+
+
+--library:Close()
+--library:Unload()
