@@ -45,7 +45,7 @@ local climb_Boost = false
 local trinketpickup_Distance = 13
 local auto_TrinketPickup = false
 local auto_BagPickup = false
-
+local uiunloaded = false
 
 
 local Meshes = {
@@ -583,7 +583,8 @@ end)
 
 spawn(function()
 		while wait() do 
-
+           if uiunloaded == true then break end
+            -- auto bag pickup
 			if auto_BagPickup == true then
 				if PlrChar then
 					for i,v in pairs(game.Workspace.Thrown:GetDescendants()) do
@@ -1585,6 +1586,23 @@ keybindsection:Keybind{
 	Blacklist = {Enum.UserInputType.MouseButton1, Enum.UserInputType.MouseButton2, Enum.UserInputType.MouseButton3},
 	Callback = function(_, fromsetting)
 		if not fromsetting then
+		    uiunloaded = true
+			toggle_1:Toggle(false)
+			toggle_2:Toggle(false)
+			toggle_3:Toggle(false)
+			toggle_4:Toggle(false)
+			toggle_5:Toggle(false)
+			toggle_6:Toggle(false)
+			toggle_7:Toggle(false)
+			toggle_8:Toggle(false)
+			toggle_9:Toggle(false)
+			toggle_10:Toggle(false)
+			toggle_11:Toggle(false)
+			toggle_12:Toggle(false)
+			toggle_13:Toggle(false)
+			toggle_14:Toggle(false)
+			toggle_15:Toggle(false)
+			toggle_16:Toggle(false)
 			library:Unload()
 		end
 	end
