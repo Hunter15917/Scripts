@@ -44,7 +44,7 @@ local speed_Boost = false
 local climb_Boost = false
 local trinketpickup_Distance = 13
 local auto_TrinketPickup = false
-
+local auto_BagPickup = false
 
 
 
@@ -264,14 +264,14 @@ local function CreateTrinketESP(Object)
 
 
 
-for i,v in pairs(Object:GetDescendants()) do
-    if v:IsA("ClickDetector") then
-        if Object:IsDescendantOf(workspace) and RoundedDistance <= trinketpickup_Distance and auto_TrinketPickup == true then
-           fireclickdetector(v)
-           wait()
-        end    
-    end
-end
+		for i,v in pairs(Object:GetDescendants()) do
+			if v:IsA("ClickDetector") then
+				if Object:IsDescendantOf(workspace) and RoundedDistance <= trinketpickup_Distance and auto_TrinketPickup == true then
+					fireclickdetector(v)
+					wait()
+				end    
+			end
+		end
 
 
 		if not Object:IsDescendantOf(workspace) then
@@ -862,9 +862,9 @@ local toggle_15 = section_Left:Toggle{
 	--Default = true,
 	Callback  = function(bool)
 		if bool == true then
-		   auto_TrinketPickup = true
+			auto_TrinketPickup = true
 		else
-		  auto_TrinketPickup = false
+			auto_TrinketPickup = false
 		end
 	end
 }
@@ -881,11 +881,56 @@ toggle_15:Keybind{
 }
 
 
+local toggle_16 = section_Left:Toggle{
+	Name = "Bag Pickup",
+	Flag = "Toggle 16",
+	--Default = true,
+	Callback  = function(bool)
+		if bool == true then
+			auto_BagPickup = true
+
+			while wait() do
+				if auto_BagPickup == false then break end
+				for i,v in pairs(game.Workspace.Thrown:GetDescendants()) do
+					if v:IsA("TouchTransmitter") and v.Parent.Name == "ToolBag" then
+						if (v.Parent.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude < 60 then
+							firetouchinterest(game.Players.LocalPlayer.Character.HumanoidRootPart, v.Parent, 0)
+							wait()
+							firetouchinterest(game.Players.LocalPlayer.Character.HumanoidRootPart, v.Parent, 1)
+						end    
+					end  
+					if v:IsA("TouchTransmitter") and v.Parent.Name == "MoneyBag" then
+						if (v.Parent.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude < 60 then
+							firetouchinterest(game.Players.LocalPlayer.Character.HumanoidRootPart, v.Parent, 0)
+							wait()
+							firetouchinterest(game.Players.LocalPlayer.Character.HumanoidRootPart, v.Parent, 1)
+						end    
+					end
+				end
+			end
+		else
+			auto_BagPickup = false
+		end
+	end
+}
+
+
+toggle_16:Keybind{
+	--Default = Enum.KeyCode.A,
+	Blacklist = {Enum.UserInputType.MouseButton1},
+	Flag = "Toggle 16 Keybind 16",
+	Mode = "Toggle", -- mode to nil if u dont want it to toggle the toggle
+	Callback = function(key, fromsetting)
+
+	end
+}
+
+
 section_Left:Button{
 	Name = "Bard",
 	Callback  = function()
 		game:GetService("Players").LocalPlayer.PlayerGui.BardGui.LocalScript.Button.Label:Destroy()
-        game:GetService("Players").LocalPlayer.PlayerGui.BardGui.ErrorFrame:Destroy()
+		game:GetService("Players").LocalPlayer.PlayerGui.BardGui.ErrorFrame:Destroy()
 	end
 }
 
