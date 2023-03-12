@@ -584,6 +584,27 @@ end)
 spawn(function()
 	while wait() do 
 
+
+		if auto_BagPickup == true then
+			if PlrChar then
+				for i,v in pairs(game.Workspace.Thrown:GetDescendants()) do
+					if v:IsA("TouchTransmitter") and v.Parent.Name == "ToolBag" then
+						if (v.Parent.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude < 60 then
+							firetouchinterest(game.Players.LocalPlayer.Character.HumanoidRootPart, v.Parent, 0)
+							wait()
+							firetouchinterest(game.Players.LocalPlayer.Character.HumanoidRootPart, v.Parent, 1)
+						end    
+					end  
+					if v:IsA("TouchTransmitter") and v.Parent.Name == "MoneyBag" then
+						if (v.Parent.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude < 60 then
+							firetouchinterest(game.Players.LocalPlayer.Character.HumanoidRootPart, v.Parent, 0)
+							wait()
+							firetouchinterest(game.Players.LocalPlayer.Character.HumanoidRootPart, v.Parent, 1)
+						end    
+					end
+				end
+			end
+		end
 		-- infinite mana 
 		if infinite_Mana == true then
 			if PlrChar then
@@ -888,27 +909,6 @@ local toggle_16 = section_Left:Toggle{
 	Callback  = function(bool)
 		if bool == true then
 			auto_BagPickup = true
-			pcall(function()
-				while wait() do
-					if auto_BagPickup == false then break end
-					for i,v in pairs(game.Workspace.Thrown:GetDescendants()) do
-						if v:IsA("TouchTransmitter") and v.Parent.Name == "ToolBag" then
-							if (v.Parent.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude < 60 then
-								firetouchinterest(game.Players.LocalPlayer.Character.HumanoidRootPart, v.Parent, 0)
-								wait()
-								firetouchinterest(game.Players.LocalPlayer.Character.HumanoidRootPart, v.Parent, 1)
-							end    
-						end  
-						if v:IsA("TouchTransmitter") and v.Parent.Name == "MoneyBag" then
-							if (v.Parent.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude < 60 then
-								firetouchinterest(game.Players.LocalPlayer.Character.HumanoidRootPart, v.Parent, 0)
-								wait()
-								firetouchinterest(game.Players.LocalPlayer.Character.HumanoidRootPart, v.Parent, 1)
-							end    
-						end
-					end
-				end
-			end)
 		else
 			auto_BagPickup = false
 		end
