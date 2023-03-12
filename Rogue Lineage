@@ -42,6 +42,10 @@ local trinket_ESP = false
 local infinite_Mana = false
 local speed_Boost = false
 local climb_Boost = false
+local trinketpickup_Distance = 13
+local auto_TrinketPickup = false
+
+
 
 
 local Meshes = {
@@ -256,7 +260,18 @@ local function CreateTrinketESP(Object)
 	local rs 
 	rs = game:GetService("RunService").RenderStepped:Connect(function()
 		local realpos, onscreen = workspace.CurrentCamera:WorldToViewportPoint(Object.Position)
-		local RoundedDistance = math.floor((game.workspace.CurrentCamera.CFrame.Position - Object.Position).Magnitude + 0.5)  
+		local RoundedDistance = math.floor((PlrChar.HumanoidRootPart.Position - Object.Position).Magnitude + 0.5)  
+
+
+
+for i,v in pairs(Object:GetDescendants()) do
+    if v:IsA("ClickDetector") then
+        if Object:IsDescendantOf(workspace) and RoundedDistance <= trinketpickup_Distance and auto_TrinketPickup == true then
+           fireclickdetector(v)
+           wait()
+        end    
+    end
+end
 
 
 		if not Object:IsDescendantOf(workspace) then
@@ -569,11 +584,10 @@ end)
 spawn(function()
 	while wait() do 
 
-
 		-- infinite mana 
 		if infinite_Mana == true then
 			if PlrChar then
-				if PlrChar:FindFirstChild("Mana") then
+				if PlrChar:FindFirstChild("Mana") and Player.PlayerGui.StatGui:FindFirstChild("LeftContainer") and Player.PlayerGui.StatGui:FindFirstChild("LeftContainer"):FindFirstChild("Mana") and Player.PlayerGui.StatGui:FindFirstChild("LeftContainer").Visible == true and Player.PlayerGui.StatGui:FindFirstChild("LeftContainer"):FindFirstChild("Mana").Visible == true then
 					PlrChar.Mana.Value = 100
 				end
 			end
@@ -839,35 +853,39 @@ toggle_2:Slider{
 
 
 
+local seperator = section_Left:Separator("Automation")
 
-local seperator = section_Left:Separator("Useful Toggle")
 
-
-local toggle_3 = section_Left:Toggle{
-	Name = "Infinite Mana",
-	Flag = "Toggle 3",
+local toggle_15 = section_Left:Toggle{
+	Name = "Trinket Pickup",
+	Flag = "Toggle 15",
 	--Default = true,
 	Callback  = function(bool)
 		if bool == true then
-			infinite_Mana = true
-			Notify("NOTIFICATION","Only works for Mana Run and Climb \n P.S Dont Climb For To Long",20,"NOTIFICATION")
+		   auto_TrinketPickup = true
 		else
-			infinite_Mana = false
-			if PlrChar then
-				repeat task.wait() PlrChar.Mana.Value = 0 until PlrChar.Mana.Value == 0
-			end
+		  auto_TrinketPickup = false
 		end
 	end
 }
 
 
-toggle_3:Keybind{
+toggle_15:Keybind{
 	--Default = Enum.KeyCode.A,
 	Blacklist = {Enum.UserInputType.MouseButton1},
-	Flag = "Toggle 3 Keybind 3",
+	Flag = "Toggle 15 Keybind 15",
 	Mode = "Toggle", -- mode to nil if u dont want it to toggle the toggle
 	Callback = function(key, fromsetting)
 
+	end
+}
+
+
+section_Left:Button{
+	Name = "Bard",
+	Callback  = function()
+		game:GetService("Players").LocalPlayer.PlayerGui.BardGui.LocalScript.Button.Label:Destroy()
+        game:GetService("Players").LocalPlayer.PlayerGui.BardGui.ErrorFrame:Destroy()
 	end
 }
 
@@ -971,6 +989,35 @@ toggle_6:Keybind{
 
 
 local seperator = section_Right:Separator("Useful Toggles")
+
+
+local toggle_3 = section_Right:Toggle{
+	Name = "Infinite Mana",
+	Flag = "Toggle 3",
+	--Default = true,
+	Callback  = function(bool)
+		if bool == true then
+			infinite_Mana = true
+			Notify("NOTIFICATION","Only works for Mana Run and Climb \n P.S Dont Climb For To Long",20,"NOTIFICATION")
+		else
+			infinite_Mana = false
+			if PlrChar then
+				repeat task.wait() PlrChar.Mana.Value = 0 until PlrChar.Mana.Value == 0
+			end
+		end
+	end
+}
+
+
+toggle_3:Keybind{
+	--Default = Enum.KeyCode.A,
+	Blacklist = {Enum.UserInputType.MouseButton1},
+	Flag = "Toggle 3 Keybind 3",
+	Mode = "Toggle", -- mode to nil if u dont want it to toggle the toggle
+	Callback = function(key, fromsetting)
+
+	end
+}
 
 
 local toggle_7 = section_Right:Toggle{
