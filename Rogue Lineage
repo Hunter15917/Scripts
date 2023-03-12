@@ -582,92 +582,82 @@ old = hook(Instance.new("RemoteEvent").FireServer, function(self,...)
 end)
 
 spawn(function()
-	while wait() do 
+		while wait() do 
 
-
-		if auto_BagPickup == true then
-			if PlrChar then
-				for i,v in pairs(game.Workspace.Thrown:GetDescendants()) do
-					if v:IsA("TouchTransmitter") and v.Parent.Name == "ToolBag" then
-						if (v.Parent.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude < 60 then
-							firetouchinterest(game.Players.LocalPlayer.Character.HumanoidRootPart, v.Parent, 0)
-							wait()
-							firetouchinterest(game.Players.LocalPlayer.Character.HumanoidRootPart, v.Parent, 1)
-						end    
-					end  
-					if v:IsA("TouchTransmitter") and v.Parent.Name == "MoneyBag" then
-						if (v.Parent.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude < 60 then
-							firetouchinterest(game.Players.LocalPlayer.Character.HumanoidRootPart, v.Parent, 0)
-							wait()
-							firetouchinterest(game.Players.LocalPlayer.Character.HumanoidRootPart, v.Parent, 1)
-						end    
+			if auto_BagPickup == true then
+				if PlrChar then
+					for i,v in pairs(game.Workspace.Thrown:GetDescendants()) do
+						if v:IsA("TouchTransmitter") then
+							if (v.Parent.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude < 60 then
+								firetouchinterest(game.Players.LocalPlayer.Character.HumanoidRootPart, v.Parent, 0)
+							end    
+						end  
 					end
 				end
 			end
-		end
-		-- infinite mana 
-		if infinite_Mana == true then
-			if PlrChar then
-				if PlrChar:FindFirstChild("Mana") and Player.PlayerGui.StatGui:FindFirstChild("LeftContainer") and Player.PlayerGui.StatGui:FindFirstChild("LeftContainer"):FindFirstChild("Mana") and Player.PlayerGui.StatGui:FindFirstChild("LeftContainer").Visible == true and Player.PlayerGui.StatGui:FindFirstChild("LeftContainer"):FindFirstChild("Mana").Visible == true then
-					PlrChar.Mana.Value = 100
-				end
-			end
-		end
-		-- full bright 
-		if full_Bright == true then
-			game.Lighting.Brightness = 1
-			game.Lighting.Ambient = Color3.fromRGB(255, 255, 255) 
-		end
-		-- no fog
-		if no_Fog == true then
-			game.Lighting.FogEnd = 99999
-			game.Lighting.FogStart = 99999
-		end
-		-- anti fire   
-		if PlrChar then 
-			if anti_fire == true and PlrChar:FindFirstChild("Burning") then 
-				--  For i,v loop on all remotes
-				for i,v in pairs(Player.Character.CharacterHandler.Remotes:GetChildren()) do
-					if (tostring(v):len() == 40 or tostring(v) == "Dodge") then
-						v:FireServer({math.random(1, 4), 0});
+			-- infinite mana 
+			if infinite_Mana == true then
+				if PlrChar then
+					if PlrChar:FindFirstChild("Mana") and Player.PlayerGui.StatGui:FindFirstChild("LeftContainer") and Player.PlayerGui.StatGui:FindFirstChild("LeftContainer"):FindFirstChild("Mana") and Player.PlayerGui.StatGui:FindFirstChild("LeftContainer").Visible == true and Player.PlayerGui.StatGui:FindFirstChild("LeftContainer"):FindFirstChild("Mana").Visible == true then
+						PlrChar.Mana.Value = 100
 					end
 				end
 			end
-		end
-		-- illu 
-		for i,v in pairs(game.Players:GetPlayers()) do
-			if v:FindFirstChild("Backpack") and game.workspace.Live:FindFirstChild(v.Name) then
-
-				if v.Backpack:FindFirstChild("Observe") or v.Character:FindFirstChild("Observe") then
-					if not table.find(All_illus, v) then
-						table.insert(All_illus, v) 
-						Notify("illusionist Detected",v.Name.." is a illusionist.",20,"illusionist")
+			-- full bright 
+			if full_Bright == true then
+				game.Lighting.Brightness = 1
+				game.Lighting.Ambient = Color3.fromRGB(255, 255, 255) 
+			end
+			-- no fog
+			if no_Fog == true then
+				game.Lighting.FogEnd = 99999
+				game.Lighting.FogStart = 99999
+			end
+			-- anti fire   
+			if PlrChar then 
+				if anti_fire == true and PlrChar:FindFirstChild("Burning") then 
+					--  For i,v loop on all remotes
+					for i,v in pairs(Player.Character.CharacterHandler.Remotes:GetChildren()) do
+						if (tostring(v):len() == 40 or tostring(v) == "Dodge") then
+							v:FireServer({math.random(1, 4), 0});
+						end
 					end
 				end
+			end
+			-- illu 
+			for i,v in pairs(game.Players:GetPlayers()) do
+				if v:FindFirstChild("Backpack") and game.workspace.Live:FindFirstChild(v.Name) then
 
-				if v.Backpack:FindFirstChild("Observe") then
-					if not table.find(NonSpectator, v) then
-						table.insert(NonSpectator, v)
+					if v.Backpack:FindFirstChild("Observe") or v.Character:FindFirstChild("Observe") then
+						if not table.find(All_illus, v) then
+							table.insert(All_illus, v) 
+							Notify("illusionist Detected",v.Name.." is a illusionist.",20,"illusionist")
+						end
 					end
-					if table.find(Spectating, v) then
-						table.remove(Spectating, i)
 
-						Notify("illusionist Has Stopped Specating",v.Name.." is a illusionist.",20,"illusionist")
-					end  
+					if v.Backpack:FindFirstChild("Observe") then
+						if not table.find(NonSpectator, v) then
+							table.insert(NonSpectator, v)
+						end
+						if table.find(Spectating, v) then
+							table.remove(Spectating, i)
+
+							Notify("illusionist Has Stopped Specating",v.Name.." is a illusionist.",20,"illusionist")
+						end  
+					end
+
+				elseif table.find(All_illus, v) and v.Backpack:FindFirstChild("Observe") == nil then
+					if table.find(NonSpectator, v) then
+						table.remove(NonSpectator, v)
+					end
+					if not table.find(Spectating, v) then
+						table.insert(Spectating, v)
+
+						Notify("illusionist Specating",v.Name.." is a illusionist.",20,"illusionist")
+					end 
 				end
-
-			elseif table.find(All_illus, v) and v.Backpack:FindFirstChild("Observe") == nil then
-				if table.find(NonSpectator, v) then
-					table.remove(NonSpectator, v)
-				end
-				if not table.find(Spectating, v) then
-					table.insert(Spectating, v)
-
-					Notify("illusionist Specating",v.Name.." is a illusionist.",20,"illusionist")
-				end 
 			end
 		end
-	end
 end)
 
 game.Players.PlayerRemoving:Connect(function(PlrLeft)
