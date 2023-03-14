@@ -2,12 +2,23 @@
 local Player = game.Players.LocalPlayer
 local PlrChar = nil
 local Mouse = game.Players.LocalPlayer:GetMouse()
+local headlocation = {}
+
 
 pcall(function()
 	PlrChar = Player.Character
 end)
 Player.CharacterAdded:Connect(function()
 	PlrChar = Player.Character 
+	for i,v in pairs(headlocation) do
+		if v then
+			table.remove(headlocation, v)
+		end
+		wait()
+	end
+	if not table.find(headlocation, PlrChar["Head"]) then
+		table.insert(headlocation, PlrChar["Head"])
+	end				
 end)
 
 
@@ -30,6 +41,11 @@ local no_Stun = false
 local anti_Grip = false
 local no_Clip = false
 local moneyfarm_Warning = false
+
+if not table.find(headlocation, PlrChar["Head"]) then
+	table.insert(headlocation, PlrChar["Head"])
+end
+
 
 
 -- variables
@@ -101,20 +117,22 @@ Player.Chatted:Connect(function(msg)
 		local plr = get_player(msg)
 	end
 end)
-game:GetService("RunService").RenderStepped:Connect(function()
-	pcall(function() 
-		for i,enemy in pairs(game.Workspace.Live:GetChildren()) do
-			if enemy ~= game.Players.LocalPlayer.Character and enemy:FindFirstChild("HumanoidRootPart") and (enemy.HumanoidRootPart.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude <= 15 and auto_PB == true and enemy:FindFirstChild("Highlight") == nil then
-				if not enemy:FindFirstChild("CombatStun") then continue end
-				local dirToOtherPlayer = (enemy.HumanoidRootPart.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).unit
-				if game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.LookVector:Dot(dirToOtherPlayer) > 0.4 then
-					game:GetService("Players").LocalPlayer.Character.Combat.RemoteEvent:FireServer(true)    
-					task.wait(.2)
-					game:GetService("Players").LocalPlayer.Character.Combat.RemoteEvent:FireServer(false)    
+RunService.RenderStepped:Connect(function()
+	spawn(function()  
+		pcall(function()
+			for i, enemy in pairs(workspace.Live:GetChildren())do
+				if enemy ~= plrChar and (plrChar.HumanoidRootPart.Position - plrChar.HumanoidRootPart.Position).Magnitude <= 15 and auto_PB == true and enemy:FindFirstChild("Highlight") == nil then
+					if not enemy:FindFirstChild("CombatStun") then continue end
+					local dirToOtherPlayer = (enemy.PrimaryPart.Position - plrChar.PrimaryPart.Position).unit
+					if plrChar.PrimaryPart.CFrame.LookVector:Dot(dirToOtherPlayer) > 0.45 then
+						game:GetService("Players").LocalPlayer.Character.Combat.RemoteEvent:FireServer(true)    
+						wait(0.2)
+						game:GetService("Players").LocalPlayer.Character.Combat.RemoteEvent:FireServer(false)    
+					end
 				end
-			end  
-			task.wait(.3)
-		end
+				wait(0.3)-- stop multiple checks of same combat stun
+			end
+		end)
 	end)
 end)
 local mt = getrawmetatable(game)
@@ -209,6 +227,7 @@ local slider = section_Left:Slider{
 	end
 }
 
+local firsttime = true
 local button = section_Left:Button{
 	Name = "Auto Pizza Job",
 	Callback  = function()
@@ -248,14 +267,12 @@ local button = section_Left:Button{
 						Button1 = "REMOVE PROMPT"
 					})
 				end
-				if PlrChar:FindFirstChild("Head") then
-					for i,v in pairs(PlrChar:GetDescendants()) do
-						if v:IsA("Accessory") then
-							v:Destroy()
+				if PlrChar:FindFirstChild("Left Arm") then
+					for i,v in pairs(headlocation) do
+						if v then
+							v.Parent = nil  
 						end
-						wait()
 					end
-					PlrChar["Head"]:Destroy()
 					PlrChar["Left Arm"]:Destroy()
 					PlrChar["Right Arm"]:Destroy()
 					PlrChar["Left Leg"]:Destroy()
@@ -266,48 +283,55 @@ local button = section_Left:Button{
 					Tween(PlrChar.HumanoidRootPart, Vector3.new(PlrChar.HumanoidRootPart.Position.X,-12,PlrChar.HumanoidRootPart.Position.Z), 15)
 					MoneyFarmDown = true
 				end
-				nograv()
 				if not PlrChar:FindFirstChild("Mission") and MoneyFarmDown == true and AtPizzaMan == false then
-					Tween(PlrChar.HumanoidRootPart, game.workspace.Missions.PizzaDelivery.Position - Vector3.new(0,15,10), moneyfarm_Speed)
+					if firsttime == true then
+					firsttime = false
+					Tween(PlrChar.HumanoidRootPart, game.workspace.Missions.PizzaDelivery.Position - Vector3.new(0,15,10), 100)
 					AtPizzaMan = true
+					else
+			        Tween(PlrChar.HumanoidRootPart, game.workspace.Missions.PizzaDelivery.Position - Vector3.new(0,15,10), moneyfarm_Speed)
+					AtPizzaMan = true
+				    end
 				elseif not PlrChar:FindFirstChild("Mission") and MoneyFarmDown == true and AtPizzaMan == true then  
+					for i,v in pairs(headlocation) do
+						if v then
+							v.Parent = PlrChar  
+						end
+					end
 					Tween(PlrChar.HumanoidRootPart, game.workspace.Missions.PizzaDelivery.Position - Vector3.new(0,-2,10), 15)
-					fireclickdetector(game.workspace.Missions.PizzaDelivery.ClickDetector)
-					repeat game:GetService("RunService").Stepped:Wait() until PlrChar:FindFirstChild("Mission")
+					repeat game:GetService("RunService").Stepped:Wait() fireclickdetector(game.workspace.Missions.PizzaDelivery.ClickDetector) until PlrChar:FindFirstChild("Mission")
 					MoneyFarmDown = false
+					spawn(function()
+					wait(1.5)
+					for i,v in pairs(headlocation) do
+						if v then
+							v.Parent = nil  
+						end
+					end
+				end)
 				end
-				nograv()
 				if PlrChar:FindFirstChild("Mission") and MoneyFarmDown == true and AtPizzaMan == true then
 					AtPizzaMan = false
-					nograv()
 					if PlrChar:FindFirstChild("Mission").Location.Value == 1 then
-						nograv()
 						Tween(PlrChar.HumanoidRootPart, Vector3.new(-378.1214599609375, -12, -467.05682373046875), moneyfarm_Speed)
 						Tween(PlrChar.HumanoidRootPart, Vector3.new(-378.1214599609375, 3.4999992847442627, -467.05682373046875), 15)
-						nograv()
 						repeat game:GetService("RunService").Stepped:Wait() until PlrChar:FindFirstChild("Mission") == nil
 						MoneyFarmDown = false
 					elseif PlrChar:FindFirstChild("Mission").Location.Value == 4 then
-						nograv()
 						Tween(PlrChar.HumanoidRootPart, Vector3.new(-92.04825592041016, -12, -602.7265625), moneyfarm_Speed)
 						Tween(PlrChar.HumanoidRootPart, Vector3.new(-92.04825592041016, 3.4999992847442627, -602.7265625), 15)
-						nograv()
 						repeat game:GetService("RunService").Stepped:Wait() until PlrChar:FindFirstChild("Mission") == nil
 						MoneyFarmDown = false
 
 					elseif PlrChar:FindFirstChild("Mission").Location.Value == 3 then
-						nograv()
 						Tween(PlrChar.HumanoidRootPart, Vector3.new(-62.05238723754883, -12, -79.0844497680664), moneyfarm_Speed)
 						Tween(PlrChar.HumanoidRootPart, Vector3.new(-62.05238723754883, 2.9999992847442627, -79.0844497680664), 15)
-						nograv()
 						repeat game:GetService("RunService").Stepped:Wait() until PlrChar:FindFirstChild("Mission") == nil
 						MoneyFarmDown = false  
 
 					elseif PlrChar:FindFirstChild("Mission").Location.Value == 2 then
-						nograv()
 						Tween(PlrChar.HumanoidRootPart, Vector3.new(304.9508361816406, -12, -176.9788818359375), moneyfarm_Speed)
 						Tween(PlrChar.HumanoidRootPart, Vector3.new(304.9508361816406, 3.0499989986419678, -176.9788818359375), 15)
-						nograv()
 						repeat game:GetService("RunService").Stepped:Wait() until PlrChar:FindFirstChild("Mission") == nil
 						MoneyFarmDown = false  
 					end
@@ -391,9 +415,9 @@ section_Left:Button{
 		spawn(function()
 			while RunService.RenderStepped:Wait() do
 				for i,v in pairs(Workspace:GetChildren()) do
-				   if v.Name == "PunchMe" then
-				    v.HumanoidRootPart.CanCollide = false
-				    end
+					if v.Name == "PunchMe" then
+						v.HumanoidRootPart.CanCollide = false
+					end
 				end
 				if PlrChar:FindFirstChild("Head") then
 					PlrChar.Head:Destroy() 
