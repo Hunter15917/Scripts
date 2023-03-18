@@ -119,12 +119,14 @@ Player.Chatted:Connect(function(msg)
 end)
 RunService.RenderStepped:Connect(function()
 	spawn(function()  
-		pcall(function()
 			for i, enemy in pairs(workspace.Live:GetChildren())do
-				if enemy ~= plrChar and (plrChar.HumanoidRootPart.Position - plrChar.HumanoidRootPart.Position).Magnitude <= 15 and auto_PB == true and enemy:FindFirstChild("Highlight") == nil then
+				if enemy ~= PlrChar and (PlrChar.HumanoidRootPart.Position - enemy.HumanoidRootPart.Position).Magnitude <= 15 and auto_PB == true and enemy:FindFirstChild("Highlight") == nil then
+				 print(1)
 					if not enemy:FindFirstChild("CombatStun") then continue end
-					local dirToOtherPlayer = (enemy.PrimaryPart.Position - plrChar.PrimaryPart.Position).unit
-					if plrChar.PrimaryPart.CFrame.LookVector:Dot(dirToOtherPlayer) > 0.45 then
+					print(2)
+					local dirToOtherPlayer = (enemy.PrimaryPart.Position - PlrChar.PrimaryPart.Position).unit
+					print(3)
+					if PlrChar.PrimaryPart.CFrame.LookVector:Dot(dirToOtherPlayer) > 0.45 then
 						game:GetService("Players").LocalPlayer.Character.Combat.RemoteEvent:FireServer(true)    
 						wait(0.2)
 						game:GetService("Players").LocalPlayer.Character.Combat.RemoteEvent:FireServer(false)    
@@ -133,7 +135,6 @@ RunService.RenderStepped:Connect(function()
 				wait(0.3)-- stop multiple checks of same combat stun
 			end
 		end)
-	end)
 end)
 local mt = getrawmetatable(game)
 make_writeable(mt)
@@ -462,6 +463,8 @@ local toggle = section_Left:Toggle{
 	Callback  = function(bool)
 		if bool == true then
 			auto_PB = true
+
+
 
 
 			if autopb_Warning == false then
