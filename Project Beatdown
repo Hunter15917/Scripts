@@ -12,7 +12,7 @@ Player.CharacterAdded:Connect(function()
 	PlrChar = Player.Character 
 	for i,v in pairs(headlocation) do
 		if v then
-			table.remove(headlocation, v)
+			table.remove(headlocation, i)
 		end
 		wait()
 	end
