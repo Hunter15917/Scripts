@@ -42,6 +42,9 @@ local anti_Grip = false
 local no_Clip = false
 local moneyfarm_Warning = false
 
+local player_WhiteListed = {};
+
+
 if not table.find(headlocation, PlrChar["Head"]) then
 	table.insert(headlocation, PlrChar["Head"])
 end
@@ -92,6 +95,8 @@ local function get_player(player_name)
 						highlight.Name = "Highlight"
 						highlight.FillColor = Color3.fromRGB(fill_colorR, fill_colorG, fill_colorB)
 						highlight.OutlineColor = Color3.fromRGB(outline_colorR, outline_colorG, outline_colorB)
+					 
+					    table.insert(player_WhiteListed, game:GetService("Players"):GetPlayerFromCharacter(playercharacter))
 					end   
 				end
 			end
@@ -106,6 +111,8 @@ local function get_player(player_name)
 					highlight.Name = "Highlight"
 					highlight.FillColor = Color3.fromRGB(fill_colorR, fill_colorG, fill_colorB)
 					highlight.OutlineColor = Color3.fromRGB(outline_colorR, outline_colorG, outline_colorB)
+				
+				    table.insert(player_WhiteListed, player)
 				end
 			end
 		end
@@ -118,14 +125,32 @@ Player.Chatted:Connect(function(msg)
 	end
 end)
 RunService.RenderStepped:Connect(function()
+pcall(function()
 	spawn(function()  
+		   if auto_PB == true then
+		       for i,v in pairs(player_WhiteListed) do
+		          if v and v.Character and v.Character:FindFirstChild("Humanoid") then
+		              if v.Character:FindFirstChild("Highlight") == nil then
+		                local highlight = Instance.new("Highlight")
+					    highlight.Parent = v.Character
+					    highlight.Name = "Highlight"
+					    highlight.FillColor = Color3.fromRGB(fill_colorR, fill_colorG, fill_colorB)
+					    highlight.OutlineColor = Color3.fromRGB(outline_colorR, outline_colorG, outline_colorB)
+		             end     
+		          end
+		      end
+		   elseif auto_PB == false then 
+		      for i,v in pairs(game.Workspace.Live:GetDescendants()) do
+			     if v.Name == "Highlight" then
+				  v:Destroy()
+			      end   
+	   	       end
+		   end
+		
 			for i, enemy in pairs(workspace.Live:GetChildren())do
 				if enemy ~= PlrChar and (PlrChar.HumanoidRootPart.Position - enemy.HumanoidRootPart.Position).Magnitude <= 15 and auto_PB == true and enemy:FindFirstChild("Highlight") == nil then
-				 print(1)
 					if not enemy:FindFirstChild("CombatStun") then continue end
-					print(2)
 					local dirToOtherPlayer = (enemy.PrimaryPart.Position - PlrChar.PrimaryPart.Position).unit
-					print(3)
 					if PlrChar.PrimaryPart.CFrame.LookVector:Dot(dirToOtherPlayer) > 0.45 then
 						game:GetService("Players").LocalPlayer.Character.Combat.RemoteEvent:FireServer(true)    
 						wait(0.2)
@@ -135,6 +160,7 @@ RunService.RenderStepped:Connect(function()
 				wait(0.3)-- stop multiple checks of same combat stun
 			end
 		end)
+   end)
 end)
 local mt = getrawmetatable(game)
 make_writeable(mt)
@@ -518,6 +544,7 @@ local toggle2 = section_Left:Toggle{
 section_Left:Button{
 	Name = "Clear Whitelist",
 	Callback  = function()
+		player_WhiteListed = {}
 		for i,v in pairs(game.Workspace.Live:GetDescendants()) do
 			if v.Name == "Highlight" then
 				v:Destroy()
